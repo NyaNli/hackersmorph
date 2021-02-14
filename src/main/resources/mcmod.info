@@ -1,0 +1,17 @@
+[
+{
+  "modid": "hackersmorph",
+  "name": "Hacker's Morph",
+  "description": "Hacker's Morph是一个对McHorse所开发的MC动画制作系列Mod进行功能修改与追加的外挂型Mod，拥有和游戏外挂一样版本一变就可能完蛋的缺点。\n目前经测试在Blockbuster2.1-2.2.2与Aperture1.5-1.5.2及Optifin HD U F5-G5上 勉 强 能 用，我家电脑反正加了这个Mod从50fps直接掉到了20fps，我估计都是结构伪装的锅。\n未测试与其他Mod的兼容性，所以不建议把这个Mod当作动画制作的核心Mod。\n因为各种原因已停止更新。",
+  "version": "停止更新",
+  "mcversion": "1.12.2",
+  "url": "https://github.com/NyaNli/hackersmorph",
+  "updateUrl": "",
+  "authorList": ["流泪猫猫头", "pop猫", "Nyan Cat", "小猫咪能有什么坏心眼呢"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "requiredMods": ["mclib", "blockbuster"],
+  "dependencies": ["mclib", "blockbuster", "aperture"]
+}
+]

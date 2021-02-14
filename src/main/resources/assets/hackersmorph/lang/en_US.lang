@@ -1,0 +1,155 @@
+#PARSE_ESCAPES
+
+# ASM
+hackersmorph.core.error=FATAL ERROR: The mod "Hacker's Morph" cannot inject code into the target mod. the version may not match anymore. Please remove "Hacker's Morph".
+
+# Command
+hackersmorph.command.relight=/relight\nRelight nearby.\nRecalculate the block light of the player's small chunk (16x16x16) and the surrounding six small chunks, and the sky light of the five chunks where the small chunks is located.
+hackersmorph.command.relight.done=Relighting completed.
+
+# Config
+hackersmorph.config.experimental=Experimental Function
+hackersmorph.config.experimental.convertdef=Allow Aperture Control Shaderpack's Properties
+hackersmorph.config.experimental.convertdef.comment=This is achieved by converting #define in the shader to a uniform variable.\nDue to the addition of almost the same number of uniform variables to the shader as the configuration options, it is expected that there will be a significant decrease in the number of frames and the shader may crash.
+hackersmorph.config.experimental.forcesync=Aperture Force Sync Tick
+hackersmorph.config.experimental.forcesync.comment=When Minema is recording, it is forced to synchronize with the server Blockbuster scene ticks.
+hackersmorph.config.experimental.forcesyncoffset=Tick Sync Offset
+hackersmorph.config.experimental.forcesyncoffset.comment=For Blockbuster 2.1-2.2.2, usually -1
+
+# Mclib
+hackersmorph.gui.transformation.origin=Rotation relative to parent origin
+hackersmorph.gui.transformation.rx=Rotation relative to parent X axis
+hackersmorph.gui.transformation.ry=Rotation relative to parent Y axis
+hackersmorph.gui.transformation.rz=Rotation relative to parent Z axis
+
+# Blockbuster
+hackersmorph.command.record.blank=\nNot a original command of BlockBuster\n/record blank <filename> <ticks> [type]\nIn the sender's current coordinates to generate a specified length of blank replay file.\nValues of type：\n - 0: Only store Position(default)\n - 1: Store date without Pitch and Body Yaw\n - 2: Store date without Body Yaw\n - 3: Store all data
+hackersmorph.command.record.blank.success=An empty record file with file name %s and length %s has been created.
+hackersmorph.gui.caption.scene_playing=Playing scene %s.
+hackersmorph.gui.sequencer.onionskin=Onion Skins
+hackersmorph.gui.sequencer.onionskin.past=Past morphs number(red)
+hackersmorph.gui.sequencer.onionskin.later=Later morphs number(green)
+hackersmorph.gui.sequencer.repeatoffset=Move model after loop
+hackersmorph.gui.sequencer.repeatoffset.times=Repeat times(0 for disable, only change the rendering position of model, it doesn't change the entity's position.)
+hackersmorph.gui.sequencer.repeatoffset.x=Model Offset X
+hackersmorph.gui.sequencer.repeatoffset.y=Model Offset Y
+hackersmorph.gui.sequencer.repeatoffset.z=Model Offset Z
+hackersmorph.gui.snowstorm.save=Save as preset
+hackersmorph.gui.snowstorm.save.tip=Please input a name for this preset:
+hackersmorph.gui.snowstorm.save.error=This name is the same as the system preset name and cannot be used.
+hackersmorph.gui.snowstorm.override.tip=There is a preset with the same name. Do you want to override it?\n(Warning: this operation cannot be undo.)
+hackersmorph.gui.structure.title=Structure Morph
+hackersmorph.gui.structure.loading=Loading Structure: %s
+hackersmorph.gui.structure.reload=Reload Structure
+hackersmorph.gui.structure.reload.tooltip=It is used to solve the problem of abnormal light caused by structure loading earlier than shader enabling, and model errors caused by different saves having the same name structure.
+hackersmorph.gui.structure.toplevel=High Rendering Priority
+hackersmorph.gui.structure.toplevel.tooltip=Only full cube blocks are valid. When it is turned on, the structure will be rendered first when it overlaps with external blocks
+hackersmorph.gui.structure.nonormal=Faked Normal
+hackersmorph.gui.structure.nonormal.tooltip=Only non tile entity blocks are valid. When it is turned on, fix the normal to point to the sky, which affects the calculated illumination of the shader. You can modify the specific normal manually in NBT.
+hackersmorph.gui.structure.lighting=Ignore World Lighting
+hackersmorph.gui.structure.lighting.tooltip=Ignore world illumination and enable self illumination within the structure.
+hackersmorph.gui.structure.custom=Custom Lighting
+hackersmorph.gui.structure.custom.tooltip=Remapping the brightness of the light in the structure.
+hackersmorph.gui.structure.custom.sky=Sky
+hackersmorph.gui.structure.custom.block=Block
+hackersmorph.gui.structure.custom.reset=Reset Curve
+hackersmorph.gui.action.morph.showscene=Preview Scene
+hackersmorph.gui.action.morph.showonionskin=Onion Skin
+hackersmorph.msg.actionbar.damagecontrol.scene=This block was managed by the Damage Control of scene %s.
+hackersmorph.msg.actionbar.damagecontrol.recorder=This block was managed by the Damage Control of player %s.
+
+# From Minecraft 1.12.2 Biome.class
+biome.minecraft.ocean=Ocean
+biome.minecraft.plains=Plains
+biome.minecraft.desert=Desert
+biome.minecraft.extreme_hills=Extreme Hills
+biome.minecraft.forest=Forest
+biome.minecraft.taiga=Taiga
+biome.minecraft.swampland=Swampland
+biome.minecraft.river=River
+biome.minecraft.hell=Hell
+biome.minecraft.sky=The End
+biome.minecraft.frozen_ocean=FrozenOcean
+biome.minecraft.frozen_river=FrozenRiver
+biome.minecraft.ice_flats=Ice Plains
+biome.minecraft.ice_mountains=Ice Mountains
+biome.minecraft.mushroom_island=MushroomIsland
+biome.minecraft.mushroom_island_shore=MushroomIslandShore
+biome.minecraft.beaches=Beach
+biome.minecraft.desert_hills=DesertHills
+biome.minecraft.forest_hills=ForestHills
+biome.minecraft.taiga_hills=TaigaHills
+biome.minecraft.smaller_extreme_hills=Extreme Hills Edge
+biome.minecraft.jungle=Jungle
+biome.minecraft.jungle_hills=JungleHills
+biome.minecraft.jungle_edge=JungleEdge
+biome.minecraft.deep_ocean=Deep Ocean
+biome.minecraft.stone_beach=Stone Beach
+biome.minecraft.cold_beach=Cold Beach
+biome.minecraft.birch_forest=Birch Forest
+biome.minecraft.birch_forest_hills=Birch Forest Hills
+biome.minecraft.roofed_forest=Roofed Forest
+biome.minecraft.taiga_cold=Cold Taiga
+biome.minecraft.taiga_cold_hills=Cold Taiga Hills
+biome.minecraft.redwood_taiga=Mega Taiga
+biome.minecraft.redwood_taiga_hills=Mega Taiga Hills
+biome.minecraft.extreme_hills_with_trees=Extreme Hills+
+biome.minecraft.savanna=Savanna
+biome.minecraft.savanna_rock=Savanna Plateau
+biome.minecraft.mesa=Mesa
+biome.minecraft.mesa_rock=Mesa Plateau F
+biome.minecraft.mesa_clear_rock=Mesa Plateau
+biome.minecraft.void=The Void
+biome.minecraft.mutated_plains=Sunflower Plains
+biome.minecraft.mutated_desert=Desert M
+biome.minecraft.mutated_extreme_hills=Extreme Hills M
+biome.minecraft.mutated_forest=Flower Forest
+biome.minecraft.mutated_taiga=Taiga M
+biome.minecraft.mutated_swampland=Swampland M
+biome.minecraft.mutated_ice_flats=Ice Plains Spikes
+biome.minecraft.mutated_jungle=Jungle M
+biome.minecraft.mutated_jungle_edge=JungleEdge M
+biome.minecraft.mutated_birch_forest=Birch Forest M
+biome.minecraft.mutated_birch_forest_hills=Birch Forest Hills M
+biome.minecraft.mutated_roofed_forest=Roofed Forest M
+biome.minecraft.mutated_taiga_cold=Cold Taiga M
+biome.minecraft.mutated_redwood_taiga=Mega Spruce Taiga
+biome.minecraft.mutated_redwood_taiga_hills=Redwood Taiga Hills M
+biome.minecraft.mutated_extreme_hills_with_trees=Extreme Hills+ M
+biome.minecraft.mutated_savanna=Savanna M
+biome.minecraft.mutated_savanna_rock=Savanna Plateau M
+biome.minecraft.mutated_mesa=Mesa (Bryce)
+biome.minecraft.mutated_mesa_rock=Mesa Plateau F M
+biome.minecraft.mutated_mesa_clear_rock=Mesa Plateau M
+
+# metamorphs
+morph.section.hackersmorph=Hacker's Morphs
+morph.category.hackersmorph.aperturehelper=Aperture Helper
+hackersmorph.morph.cameramorph=Camera Morph
+hackersmorph.morph.cameramorph.label.tooltip=Please give the camera a unique name.
+
+# aperture
+hackersmorph.gui.curve.integer=(Integer)
+hackersmorph.gui.curve.brightness=Brightness(Gamma)
+hackersmorph.gui.curve.vanilla.skyr=Sky Color R
+hackersmorph.gui.curve.vanilla.skyg=Sky Color G
+hackersmorph.gui.curve.vanilla.skyb=Sky Color B
+hackersmorph.gui.curve.vanilla.cloudr=Cloud Color R
+hackersmorph.gui.curve.vanilla.cloudg=Cloud Color G
+hackersmorph.gui.curve.vanilla.cloudb=Cloud Color B
+hackersmorph.gui.curve.vanilla.fogr=Fog Color R
+hackersmorph.gui.curve.vanilla.fogg=Fog Color G
+hackersmorph.gui.curve.vanilla.fogb=Fog Color B
+hackersmorph.gui.curve.vanilla.fogstart=Fog Start Point
+hackersmorph.gui.curve.vanilla.fogend=Fog End Point
+hackersmorph.gui.curve.vanilla.fogdensity=Fog Density(Under Water)
+hackersmorph.gui.curve.vanilla.celestialangle=Celestial Angle
+hackersmorph.gui.curve.shader=%s(Shaders)
+hackersmorph.gui.curve.shader.rainstrength=Rain Strength
+hackersmorph.gui.curve.shader.wetness=Wetness
+hackersmorph.gui.curve.shader.centerdepth=Focus Point
+hackersmorph.gui.curve.shader.sunpathrotation=Sun Path Rotation
+hackersmorph.gui.curve.shader.iseyeinwater=Under Water Mode
+hackersmorph.gui.curve.shader.worldtime=Fake World Time
+hackersmorph.gui.fixture.cameramorph=Camera Morph
+hackersmorph.gui.fixture.cameramorph.tooltip=Please enter the name of the corresponding camera morph.\nPlease note: Camera Morph on body parts only takes effect when "Use target" is turned on.

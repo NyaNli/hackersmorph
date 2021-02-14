@@ -1,0 +1,155 @@
+#PARSE_ESCAPES
+
+# ASM
+hackersmorph.core.error=严重故障：Hacker's Morph无法注入代码至目标Mod，可能版本已不匹配，请移除本Mod。
+
+# Command
+hackersmorph.command.relight=/relight\n重算周围光照\n重算玩家所处小区块（16x16x16）及周围6个小区块的方块光照，以及这些小区块所处的5个区块的天空光照
+hackersmorph.command.relight.done=重算光照完成
+
+# Config
+hackersmorph.config.experimental=实验性功能
+hackersmorph.config.experimental.convertdef=允许Aperture控制光影包配置
+hackersmorph.config.experimental.convertdef.comment=通过将光影中的#define转换为uniform变量实现\n因为向光影中添加了与配置选项几乎相同数量的uniform变量，预计会有比较明显的帧数下降，而且可能导致光影崩溃
+hackersmorph.config.experimental.forcesync=Aperture强制时间同步
+hackersmorph.config.experimental.forcesync.comment=Minema录制时，强制与服务端Blockbuster场景时间同步
+hackersmorph.config.experimental.forcesyncoffset=时间同步偏移
+hackersmorph.config.experimental.forcesyncoffset.comment=对于Blockbuster2.1-2.2.2版本，通常为-1
+
+# Mclib
+hackersmorph.gui.transformation.origin=相对父坐标轴原点旋转
+hackersmorph.gui.transformation.rx=相对父X轴旋转
+hackersmorph.gui.transformation.ry=相对父Y轴旋转
+hackersmorph.gui.transformation.rz=相对父Z轴旋转
+
+# Blockbuster
+hackersmorph.command.record.blank=\n非BlockBuster原版命令\n/record blank <文件名> <时长> [类型]\n在玩家当前坐标生成一个指定时长的空白回放文件。\n类型参数值：\n - 0 仅存储坐标（默认）\n - 1 存储Pitch与Body Yaw以外所有数据\n - 2 存储Body Yaw以外所有数据\n - 3 存储全部数据
+hackersmorph.command.record.blank.success=已创建文件名为 %s 长度 %s 的空录像文件
+hackersmorph.gui.caption.scene_playing=正在播放场景 %s
+hackersmorph.gui.sequencer.onionskin=洋葱皮
+hackersmorph.gui.sequencer.onionskin.past=先前伪装数量（红色）
+hackersmorph.gui.sequencer.onionskin.later=后续伪装数量（绿色）
+hackersmorph.gui.sequencer.repeatoffset=模型循环位移
+hackersmorph.gui.sequencer.repeatoffset.times=循环次数（设为0关闭位移，只会改变模型渲染位置，实体位置不会改变）
+hackersmorph.gui.sequencer.repeatoffset.x=模型坐标偏移X
+hackersmorph.gui.sequencer.repeatoffset.y=模型坐标偏移Y
+hackersmorph.gui.sequencer.repeatoffset.z=模型坐标偏移Z
+hackersmorph.gui.snowstorm.save=保存为预设
+hackersmorph.gui.snowstorm.save.tip=请输入要保存的预设名：
+hackersmorph.gui.snowstorm.save.error=存在相同名称的系统预设，此名称不可用。
+hackersmorph.gui.snowstorm.override.tip=存在相同名称的预设，是否覆盖？\n（警告：此操作不可恢复）
+hackersmorph.gui.structure.title=结构伪装
+hackersmorph.gui.structure.loading=结构加载中：%s
+hackersmorph.gui.structure.reload=重载结构
+hackersmorph.gui.structure.reload.tooltip=解决在开启光影前加载了结构导致光影无法正常计算光照的问题，以及不同存档拥有相同名称结构导致的模型错误问题
+hackersmorph.gui.structure.toplevel=优先渲染
+hackersmorph.gui.structure.toplevel.tooltip=仅完整方块有效，开启后在与外部方块重叠时会优先渲染结构
+hackersmorph.gui.structure.nonormal=伪造法线
+hackersmorph.gui.structure.nonormal.tooltip=仅非实体方块有效，开启后固定法线为指向天空，影响光影计算光照，可在NBT中手动修改具体法线
+hackersmorph.gui.structure.lighting=独立光照
+hackersmorph.gui.structure.lighting.tooltip=忽略世界光照并启用结构内自身光照
+hackersmorph.gui.structure.custom=自定义光照参数
+hackersmorph.gui.structure.custom.tooltip=重映射结构内光照亮度
+hackersmorph.gui.structure.custom.sky=天空光源
+hackersmorph.gui.structure.custom.block=方块光源
+hackersmorph.gui.structure.custom.reset=重置曲线
+hackersmorph.gui.action.morph.showscene=预览场景
+hackersmorph.gui.action.morph.showonionskin=洋葱皮
+hackersmorph.msg.actionbar.damagecontrol.scene=此方块由场景 %s 的破坏控制功能管理
+hackersmorph.msg.actionbar.damagecontrol.recorder=此方块由录制者 %s 的破坏控制功能管理
+
+# Translate results reference from Minecraft 1.13 zh_cn.json
+# Biome id map reference from Minecraft 1.13-pre5 update log
+biome.minecraft.ocean=海洋(Ocean)
+biome.minecraft.plains=草原(Plains)
+biome.minecraft.desert=沙漠(Desert)
+biome.minecraft.extreme_hills=山地(Extreme Hills)
+biome.minecraft.forest=森林(Forest)
+biome.minecraft.taiga=针叶林(Taiga)
+biome.minecraft.swampland=沼泽(Swampland)
+biome.minecraft.river=河流(River)
+biome.minecraft.hell=下界(Hell)
+biome.minecraft.sky=末地(The End)
+biome.minecraft.frozen_ocean=冻洋(FrozenOcean)
+biome.minecraft.frozen_river=冻河(FrozenRiver)
+biome.minecraft.ice_flats=积雪的冻原(Ice Plains)
+biome.minecraft.ice_mountains=雪山(Ice Mountains)
+biome.minecraft.mushroom_island=蘑菇岛(MushroomIsland)
+biome.minecraft.mushroom_island_shore=蘑菇岛岸(MushroomIslandShore)
+biome.minecraft.beaches=沙滩(Beach)
+biome.minecraft.desert_hills=沙漠丘陵(DesertHills)
+biome.minecraft.forest_hills=繁茂的丘陵(ForestHills)
+biome.minecraft.taiga_hills=针叶林丘陵(TaigaHills)
+biome.minecraft.smaller_extreme_hills=山地边缘(Extreme Hills Edge)
+biome.minecraft.jungle=丛林(Jungle)
+biome.minecraft.jungle_hills=丛林丘陵(JungleHills)
+biome.minecraft.jungle_edge=丛林边缘(JungleEdge)
+biome.minecraft.deep_ocean=深海(Deep Ocean)
+biome.minecraft.stone_beach=石岸(Stone Beach)
+biome.minecraft.cold_beach=积雪的沙滩(Cold Beach)
+biome.minecraft.birch_forest=桦木森林(Birch Forest)
+biome.minecraft.birch_forest_hills=桦木森林丘陵(Birch Forest Hills)
+biome.minecraft.roofed_forest=黑森林(Roofed Forest)
+biome.minecraft.taiga_cold=积雪的针叶林(Cold Taiga)
+biome.minecraft.taiga_cold_hills=积雪的针叶林丘陵(Cold Taiga Hills)
+biome.minecraft.redwood_taiga=巨型针叶林(Mega Taiga)
+biome.minecraft.redwood_taiga_hills=巨型针叶林丘陵(Mega Taiga Hills)
+biome.minecraft.extreme_hills_with_trees=繁茂的山地(Extreme Hills+)
+biome.minecraft.savanna=热带草原(Savanna)
+biome.minecraft.savanna_rock=热带高原(Savanna Plateau)
+biome.minecraft.mesa=恶地(Mesa)
+biome.minecraft.mesa_rock=繁茂的恶地高原(Mesa Plateau F)
+biome.minecraft.mesa_clear_rock=恶地高原(Mesa Plateau)
+biome.minecraft.void=虚空(The Void)
+biome.minecraft.mutated_plains=向日葵草原(Sunflower Plains)
+biome.minecraft.mutated_desert=沙漠湖泊(Desert M)
+biome.minecraft.mutated_extreme_hills=沙砾山地(Extreme Hills M)
+biome.minecraft.mutated_forest=繁花森林(Flower Forest)
+biome.minecraft.mutated_taiga=针叶林山地(Taiga M)
+biome.minecraft.mutated_swampland=沼泽山丘(Swampland M)
+biome.minecraft.mutated_ice_flats=冰刺平原(Ice Plains Spikes)
+biome.minecraft.mutated_jungle=丛林变种(Jungle M)
+biome.minecraft.mutated_jungle_edge=丛林边缘变种(JungleEdge M)
+biome.minecraft.mutated_birch_forest=高大桦木森林(Birch Forest M)
+biome.minecraft.mutated_birch_forest_hills=高大桦木丘陵(Birch Forest Hills M)
+biome.minecraft.mutated_roofed_forest=黑森林丘陵(Roofed Forest M)
+biome.minecraft.mutated_taiga_cold=积雪的针叶林山地(Cold Taiga M)
+biome.minecraft.mutated_redwood_taiga=巨型云杉针叶林(Mega Spruce Taiga)
+biome.minecraft.mutated_redwood_taiga_hills=巨型云杉针叶林丘陵(Redwood Taiga Hills M)
+biome.minecraft.mutated_extreme_hills_with_trees=沙砾山地+(Extreme Hills+ M)
+biome.minecraft.mutated_savanna=破碎的热带草原(Savanna M)
+biome.minecraft.mutated_savanna_rock=破碎的热带高原(Savanna Plateau M)
+biome.minecraft.mutated_mesa=被风蚀的恶地(Mesa (Bryce))
+biome.minecraft.mutated_mesa_rock=繁茂的恶地高原变种(Mesa Plateau F M)
+biome.minecraft.mutated_mesa_clear_rock=恶地高原变种(Mesa Plateau M)
+
+# metamorphs
+morph.category.hackersmorph.aperturehelper=Aperture 辅助
+hackersmorph.morph.cameramorph=相机伪装
+hackersmorph.morph.cameramorph.label.tooltip=请为相机伪装设置一个独一无二的名称
+
+# aperture
+hackersmorph.gui.curve.integer=（整数型）
+hackersmorph.gui.curve.brightness=亮度（Gamma）
+hackersmorph.gui.curve.vanilla.skyr=天空颜色R
+hackersmorph.gui.curve.vanilla.skyg=天空颜色G
+hackersmorph.gui.curve.vanilla.skyb=天空颜色B
+hackersmorph.gui.curve.vanilla.cloudr=云颜色R
+hackersmorph.gui.curve.vanilla.cloudg=云颜色G
+hackersmorph.gui.curve.vanilla.cloudb=云颜色B
+hackersmorph.gui.curve.vanilla.fogr=雾颜色R
+hackersmorph.gui.curve.vanilla.fogg=雾颜色G
+hackersmorph.gui.curve.vanilla.fogb=雾颜色B
+hackersmorph.gui.curve.vanilla.fogstart=雾起始点
+hackersmorph.gui.curve.vanilla.fogend=雾消失点
+hackersmorph.gui.curve.vanilla.fogdensity=雾浓度（水下）
+hackersmorph.gui.curve.vanilla.celestialangle=日月角度
+hackersmorph.gui.curve.shader=%s（光影）
+hackersmorph.gui.curve.shader.rainstrength=阴天程度
+hackersmorph.gui.curve.shader.wetness=潮湿度
+hackersmorph.gui.curve.shader.centerdepth=对焦点
+hackersmorph.gui.curve.shader.sunpathrotation=日月偏角
+hackersmorph.gui.curve.shader.iseyeinwater=水下模式
+hackersmorph.gui.curve.shader.worldtime=时间参数
+hackersmorph.gui.fixture.cameramorph=相机伪装
+hackersmorph.gui.fixture.cameramorph.tooltip=请输入对应相机伪装的名称\n请注意：肢体部位上的相机伪装只有在开启“使用目标”时才会生效
