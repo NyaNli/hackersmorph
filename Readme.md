@@ -6,7 +6,8 @@ ___2. 第一个坏消息是真的___
 
 ----------------------------
 
-本Mod中包含了对Optifine的修改和引用，不过Optifine的FAQ对Can I include OptiFine in my modpack?的回答是Generally no, unless you have an explicit permission from us.说实话不太明白include Optifine in my modpack是什么意思，是指mod以Optifine作为了前置mod？还是在mod发布时“包含”了Optifine？说实话我不太清楚= =总之如果这方面出了问题就删库跑路呗，虽然已经在跑路了
+<s>本Mod中包含了对Optifine的修改和引用，不过Optifine的FAQ对Can I include OptiFine in my modpack?的回答是Generally no, unless you have an explicit permission from us.说实话不太明白include Optifine in my modpack是什么意思，是指mod以Optifine作为了前置mod？还是在mod发布时“包含”了Optifine？说实话我不太清楚= =总之如果这方面出了问题就删库跑路呗，虽然已经在跑路了</s>  
+经过大佬解答引用Optifine作为前置Mod似乎是没问题的\[issue#1\]，但我不管我依然要跑路
 
 ----------------------------
 
