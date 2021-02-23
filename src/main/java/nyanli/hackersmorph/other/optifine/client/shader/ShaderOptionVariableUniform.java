@@ -2,9 +2,9 @@ package nyanli.hackersmorph.other.optifine.client.shader;
 
 import java.util.regex.Pattern;
 
+import net.optifine.shaders.config.ShaderOptionVariable;
 import nyanli.hackersmorph.HackersMorph;
 import nyanli.hackersmorph.other.optifine.client.manager.ShaderManager;
-import nyanli.hackersmorph.other.optifine.router.shaders.config.ShaderOptionVariable;
 
 public class ShaderOptionVariableUniform extends ShaderOptionVariable implements IOptionUniform {
 	

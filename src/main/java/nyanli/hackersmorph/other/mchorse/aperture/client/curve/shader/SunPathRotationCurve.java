@@ -1,7 +1,7 @@
 package nyanli.hackersmorph.other.mchorse.aperture.client.curve.shader;
 
 import net.minecraft.client.resources.I18n;
-import nyanli.hackersmorph.other.optifine.router.shaders.Shaders;
+import net.optifine.shaders.Shaders;
 
 public class SunPathRotationCurve extends AbstractShaderCurve {
 

@@ -4,6 +4,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FrameNode;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -19,6 +20,7 @@ public class ASM extends ClassTransformer {
 	private static final String GuiCurves = "mchorse/aperture/client/gui/GuiCurves";
 //	private static final String AbstractFixture = "mchorse/aperture/camera/fixtures/AbstractFixture";
 	private static final String CameraProfile = "mchorse/aperture/camera/CameraProfile";
+	private static final String GuiCameraEditor = "mchorse/aperture/client/gui/GuiCameraEditor";
 	
 	private static final String CameraEditorManager = "nyanli/hackersmorph/other/mchorse/aperture/client/manager/CameraEditorManager";
 	private static final String GuiMoreCurves = "nyanli/hackersmorph/other/mchorse/aperture/client/gui/GuiMoreCurves";
@@ -43,6 +45,18 @@ public class ASM extends ClassTransformer {
 					method.instructions.getFirst(),
 					InsertPos.AFTER,
 					new MethodInsnNode(Opcodes.INVOKESTATIC, CameraEditorManager, "onGuiClose", "()V", false)
+			);
+		}
+
+		@Patcher.Method("func_73863_a(IIF)V")
+		@Patcher.Method("drawScreen(IIF)V")
+		public static void drawScreen(MethodNode method) {
+			insertNode(method,
+					method.instructions.getFirst(),
+					InsertPos.AFTER,
+					new VarInsnNode(Opcodes.ALOAD, 0),
+					new InsnNode(Opcodes.FCONST_0),
+					new FieldInsnNode(Opcodes.PUTFIELD, GuiCameraEditor, "lastPartialTick", "F")
 			);
 		}
 		

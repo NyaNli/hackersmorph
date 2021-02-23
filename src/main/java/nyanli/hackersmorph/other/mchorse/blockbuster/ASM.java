@@ -38,6 +38,9 @@ public class ASM extends ClassTransformer {
 	private static final String Scene = "mchorse/blockbuster/recording/scene/Scene";
 	private static final String RecordPlayer = "mchorse/blockbuster/recording/RecordPlayer";
 	private static final String CameraHandler = "mchorse/blockbuster/aperture/CameraHandler";
+	private static final String ClientProxy = "mchorse/blockbuster/ClientProxy";
+	private static final String RecordManager = "mchorse/blockbuster/recording/RecordManager";
+	private static final String PacketRequestedFrames = "mchorse/blockbuster/network/common/recording/PacketRequestedFrames";
 	
 	private static final String TypeClientHandlerStructure = "Lmchorse/blockbuster/network/client/ClientHandlerStructure;";
 	
@@ -794,6 +797,18 @@ public class ASM extends ClassTransformer {
 			);
 		}
 		
+		@Patcher.Method("readSpawnData(Lio/netty/buffer/ByteBuf;)V")
+		public static void readSpawnData(MethodNode method) {
+			insertNode(method,
+					queryNode(method,
+							node -> node.getOpcode() == Opcodes.INVOKEINTERFACE,
+							node -> "containsKey".equals(((MethodInsnNode)node).name)
+					),
+					InsertPos.REPLACE,
+					new MethodInsnNode(Opcodes.INVOKESTATIC, RecordExtraManager, "actorReadSpawnData", "(Ljava/util/Map;Ljava/lang/String;)Z", false)
+			);
+		}
+		
 	}
 	
 	// Aperture强制同步
@@ -840,6 +855,42 @@ public class ASM extends ClassTransformer {
 					new VarInsnNode(Opcodes.ALOAD, 1),
 					new VarInsnNode(Opcodes.ALOAD, 2),
 					new MethodInsnNode(Opcodes.INVOKESTATIC, RecordExtraManager, "clientActorPause", method.desc, false)
+			);
+		}
+		
+	}
+	
+	@Patcher("mchorse.blockbuster.network.client.recording.ClientHandlerRequestedFrames")
+	public static class ClientHandlerRequestedFramesPatcher {
+		
+		@Patcher.Method("run(Lnet/minecraft/client/entity/EntityPlayerSP;Lmchorse/blockbuster/network/common/recording/PacketRequestedFrames;)V")
+		public static void run(MethodNode method) {
+			LabelNode label = new LabelNode();
+			insertNode(method,
+					queryNode(method, 
+							node -> node.getOpcode() == Opcodes.NEW,
+							node -> Record.equals(((TypeInsnNode) node).desc)
+					),
+					InsertPos.BEFORE,
+					new FieldInsnNode(Opcodes.GETSTATIC, ClientProxy, "manager", "Lmchorse/blockbuster/recording/RecordManager;"),
+					new FieldInsnNode(Opcodes.GETFIELD, RecordManager, "records", "Ljava/util/Map;"),
+					new VarInsnNode(Opcodes.ALOAD, 2),
+					new FieldInsnNode(Opcodes.GETFIELD, PacketRequestedFrames, "filename", "Ljava/lang/String;"),
+					new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true),
+					new TypeInsnNode(Opcodes.CHECKCAST, Record),
+					new InsnNode(Opcodes.DUP),
+					new JumpInsnNode(Opcodes.IFNONNULL, label),
+					new InsnNode(Opcodes.POP)
+			);
+			insertNode(method,
+					queryContinue(
+							node -> node.getOpcode() == Opcodes.INVOKESPECIAL,
+							node -> Record.equals(((MethodInsnNode) node).owner),
+							node -> "<init>".equals(((MethodInsnNode) node).name)
+					),
+					InsertPos.AFTER,
+					label,
+					new FrameNode(Opcodes.F_SAME1, 0, null, 1, new Object[] { Record })
 			);
 		}
 		

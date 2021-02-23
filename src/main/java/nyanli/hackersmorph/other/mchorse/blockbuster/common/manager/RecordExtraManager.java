@@ -3,6 +3,7 @@ package nyanli.hackersmorph.other.mchorse.blockbuster.common.manager;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import mchorse.blockbuster.Blockbuster;
 import mchorse.blockbuster.ClientProxy;
@@ -167,6 +168,10 @@ public class RecordExtraManager {
 			applyPrevFrame(actor, record, tick, force, realPlayer);
 		else
 			record.applyFrame(tick, actor, force, realPlayer);
+	}
+	
+	public static boolean actorReadSpawnData(Map map, String record) {
+		return map.containsKey(record) && ((Record)map.get(record)).frames != null && !((Record)map.get(record)).frames.isEmpty();
 	}
 	
 	public static void clientActorPause(EntityPlayerSP player, PacketActorPause message) {

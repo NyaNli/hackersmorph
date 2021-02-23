@@ -25,12 +25,12 @@ public class ASM extends ClassTransformer {
 	private static final String ShaderOptionVariableUniform = "nyanli/hackersmorph/other/optifine/client/shader/ShaderOptionVariableUniform";
 //	private static final String ShaderOptionVariableConstUniform = "nyanli/hackersmorph/other/optifine/client/shader/ShaderOptionVariableConstUniform";
 	
-	@Override
-	public byte[] transform(String name, String transformedName, byte[] basicClass) {
-		if (name.startsWith("nyanli.hackersmorph.other.optifine.router"))
-			return super.transform("OptifineRouter", transformedName, basicClass);
-		return super.transform(name, transformedName, basicClass);
-	}
+//	@Override
+//	public byte[] transform(String name, String transformedName, byte[] basicClass) {
+//		if (name.startsWith("nyanli.hackersmorph.other.optifine.router"))
+//			return super.transform("OptifineRouter", transformedName, basicClass);
+//		return super.transform(name, transformedName, basicClass);
+//	}
 	
 	@Patcher("net.optifine.shaders.Shaders")
 	public static class ShadersPatcher {
@@ -43,7 +43,8 @@ public class ASM extends ClassTransformer {
 			insertNode(method,
 					queryNode(method, node -> node.getOpcode() == Opcodes.INVOKEVIRTUAL),
 					InsertPos.REPLACE,
-					new MethodInsnNode(Opcodes.INVOKESTATIC, ShaderManager, method.name.replace("set", "hook"), "(Ljava/lang/Object;" + method.desc.substring(method.desc.length() - 3), false)
+//					new MethodInsnNode(Opcodes.INVOKESTATIC, ShaderManager, method.name.replace("set", "hook"), "(Ljava/lang/Object;" + method.desc.substring(method.desc.length() - 3), false)
+					new MethodInsnNode(Opcodes.INVOKESTATIC, ShaderManager, method.name.replace("set", "hook"), method.desc, false)
 			);
 		}
 		
@@ -180,53 +181,53 @@ public class ASM extends ClassTransformer {
 		
 	}
 	
-	@Patcher("OptifineRouter")
-	public static class RouterPatcher {
-		
-		@Patcher.Class
-		public static void patch(ClassNode clazz) {
-			String route = clazz.name.replace("nyanli/hackersmorph/other/optifine/router", "net/optifine");
-			clazz.superName = route;
-			clazz.fields.clear();
-			Iterator<MethodNode> iterator = clazz.methods.iterator();
-			while (iterator.hasNext()) {
-				MethodNode node = iterator.next();
-				if ("<init>".equals(node.name))
-					patchInit(node, route);
-				else
-					iterator.remove();
-			}
-		}
-		
-		private static void patchInit(MethodNode method, String route) {
-			method.maxStack = method.maxLocals;
-			while (method.instructions.get(1) != method.instructions.getLast()) method.instructions.remove(method.instructions.get(1));
-			for (LocalVariableNode local : method.localVariables)
-				method.instructions.insertBefore(method.instructions.getLast(), new VarInsnNode(getLoad(local.desc), local.index));
-			method.instructions.insertBefore(method.instructions.getLast(), new MethodInsnNode(Opcodes.INVOKESPECIAL, route, method.name, method.desc, false));
-			method.instructions.insertBefore(method.instructions.getLast(), new InsnNode(Opcodes.RETURN));
-		}
-		
-		private static int getLoad(String type) {
-			switch (type) {
-			case "Z":
-			case "B":
-			case "C":
-			case "S":
-			case "I":
-				return Opcodes.ILOAD;
-			case "J":
-				return Opcodes.LLOAD;
-			case "F":
-				return Opcodes.FLOAD;
-			case "D":
-				return Opcodes.DLOAD;
-			default:
-				return Opcodes.ALOAD;
-			}
-		}
-		
-	}
+//	@Patcher("OptifineRouter")
+//	public static class RouterPatcher {
+//		
+//		@Patcher.Class
+//		public static void patch(ClassNode clazz) {
+//			String route = clazz.name.replace("nyanli/hackersmorph/other/optifine/router", "net/optifine");
+//			clazz.superName = route;
+//			clazz.fields.clear();
+//			Iterator<MethodNode> iterator = clazz.methods.iterator();
+//			while (iterator.hasNext()) {
+//				MethodNode node = iterator.next();
+//				if ("<init>".equals(node.name))
+//					patchInit(node, route);
+//				else
+//					iterator.remove();
+//			}
+//		}
+//		
+//		private static void patchInit(MethodNode method, String route) {
+//			method.maxStack = method.maxLocals;
+//			while (method.instructions.get(1) != method.instructions.getLast()) method.instructions.remove(method.instructions.get(1));
+//			for (LocalVariableNode local : method.localVariables)
+//				method.instructions.insertBefore(method.instructions.getLast(), new VarInsnNode(getLoad(local.desc), local.index));
+//			method.instructions.insertBefore(method.instructions.getLast(), new MethodInsnNode(Opcodes.INVOKESPECIAL, route, method.name, method.desc, false));
+//			method.instructions.insertBefore(method.instructions.getLast(), new InsnNode(Opcodes.RETURN));
+//		}
+//		
+//		private static int getLoad(String type) {
+//			switch (type) {
+//			case "Z":
+//			case "B":
+//			case "C":
+//			case "S":
+//			case "I":
+//				return Opcodes.ILOAD;
+//			case "J":
+//				return Opcodes.LLOAD;
+//			case "F":
+//				return Opcodes.FLOAD;
+//			case "D":
+//				return Opcodes.DLOAD;
+//			default:
+//				return Opcodes.ALOAD;
+//			}
+//		}
+//		
+//	}
 	
 //	@Patcher("net.optifine.shaders.ShadersRender")
 //	public static class ShadersRenderPatcher {

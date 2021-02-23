@@ -27,10 +27,10 @@ public class OnionSkinManager {
 		GlStateManager.doPolygonOffset(1f, 1f);
 		if (last != null)
 			for (OnionSkin skin : last)
-				renderOnionSkin(skin, renderer.getEntity());
+				renderOnionSkin(renderer, skin);
 		if (current != null)
 			for (OnionSkin skin : current)
-				renderOnionSkin(skin, renderer.getEntity());
+				renderOnionSkin(renderer, skin);
 		GlStateManager.disablePolygonOffset();
 		GlStateManager.disableBlend();
 	}
@@ -52,7 +52,7 @@ public class OnionSkinManager {
 		last = stack.pop();
 	}
 	
-	private static void renderOnionSkin(OnionSkin skin, EntityLivingBase entity) {
+	private static void renderOnionSkin(GuiModelRenderer renderer, OnionSkin skin) {
 		if (skin.morph == null) return;
 		if (!skin.light)
 			GlStateManager.disableLighting();
@@ -61,6 +61,7 @@ public class OnionSkinManager {
 			GlStateManager.color(skin.color.getX(), skin.color.getY(), skin.color.getZ(), skin.color.getW());
 			RenderManager.lockColor();
 		}
+		EntityLivingBase entity = renderer.getEntity();
 		float prevPitch = entity.prevRotationPitch;
 		float prevYawOffset = entity.prevRenderYawOffset;
 		float prevYaw = entity.prevRotationYaw;
@@ -73,7 +74,7 @@ public class OnionSkinManager {
 		entity.prevRenderYawOffset = entity.renderYawOffset = skin.yawOffset;
 		entity.prevRotationYaw = entity.rotationYaw = entity.prevRotationYawHead = entity.rotationYawHead = skin.yaw;
 		GlStateManager.pushMatrix();
-		MorphUtils.render(skin.morph, entity, skin.offset.x, skin.offset.y, skin.offset.z, 0, 0);
+		MorphUtils.render(skin.morph, entity, skin.offset.x, skin.offset.y, skin.offset.z, skin.yaw, 0); // No looking
 		GlStateManager.popMatrix();
 		entity.prevRotationPitch = prevPitch;
 		entity.prevRenderYawOffset = prevYawOffset;

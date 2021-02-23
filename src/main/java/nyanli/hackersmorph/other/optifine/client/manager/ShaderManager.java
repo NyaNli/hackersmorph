@@ -8,14 +8,11 @@ import java.util.function.Consumer;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.optifine.shaders.Shaders;
+import net.optifine.shaders.uniform.ShaderUniform1f;
+import net.optifine.shaders.uniform.ShaderUniform1i;
 import nyanli.hackersmorph.HackersMorph;
 import nyanli.hackersmorph.other.optifine.client.shader.IOptionUniform;
-import nyanli.hackersmorph.other.optifine.proxy.ProxyManager;
-import nyanli.hackersmorph.other.optifine.proxy.shaders.uniform.IShaderUniform1f;
-import nyanli.hackersmorph.other.optifine.proxy.shaders.uniform.IShaderUniform1i;
-import nyanli.hackersmorph.other.optifine.router.shaders.Shaders;
-import nyanli.hackersmorph.other.optifine.router.shaders.uniform.ShaderUniform1f;
-import nyanli.hackersmorph.other.optifine.router.shaders.uniform.ShaderUniform1i;
 
 @SideOnly(Side.CLIENT)
 public class ShaderManager {
@@ -168,8 +165,7 @@ public class ShaderManager {
 	
 // Hooker =============================================
 	
-	public static void hookProgramUniform1i(Object s, int value) {
-		IShaderUniform1i su = ProxyManager.generateProxy(s, IShaderUniform1i.class);
+	public static void hookProgramUniform1i(ShaderUniform1i su, int value) {
 		if (enabled.contains(su.getName()) && uniform1i.get(su.getName()) != null)
 			value = uniform1i.get(su.getName());
 		setUniform1i(su.getName(), value);
@@ -185,8 +181,7 @@ public class ShaderManager {
 //		su.setValue(v1, v2);
 //	}
 
-	public static void hookProgramUniform1f(Object s, float value) {
-		IShaderUniform1f su = ProxyManager.generateProxy(s, IShaderUniform1f.class);
+	public static void hookProgramUniform1f(ShaderUniform1f su, float value) {
 		if (enabled.contains(su.getName()) && uniform1f.get(su.getName()) != null)
 			value = uniform1f.get(su.getName());
 		setUniform1f(su.getName(), value);

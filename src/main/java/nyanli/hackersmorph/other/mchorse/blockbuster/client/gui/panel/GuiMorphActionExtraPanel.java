@@ -40,6 +40,8 @@ import mchorse.metamorph.client.gui.creative.GuiCreativeMorphsMenu;
 import mchorse.metamorph.client.gui.creative.GuiMorphRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.IChunkProvider;
 import nyanli.hackersmorph.other.mchorse.blockbuster.common.manager.SequencerMorphManager;
 import nyanli.hackersmorph.other.mchorse.metamorph.client.manager.OnionSkinManager;
 import nyanli.hackersmorph.other.mchorse.metamorph.client.manager.OnionSkinManager.OnionSkin;
@@ -47,30 +49,31 @@ import nyanli.hackersmorph.other.mchorse.metamorph.client.manager.OnionSkinManag
 public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 
 	private static final FoundAction ACTION = new FoundAction();
-	private static final EntityActor actor;
+	private static EntityActor actor;
 	
-	static {
-		actor = new EntityActor(Minecraft.getMinecraft().world);
-		actor.manual = true;
+	private static void refreshActor() {
+		if (actor == null || actor.world != Minecraft.getMinecraft().world) {
+			actor = new EntityActor(Minecraft.getMinecraft().world);
+			actor.manual = true;
+		}
 	}
 	
 	private static void applyRecord(Record record, int tick, Replay replay, boolean doAction) {
+		refreshActor();
 		actor.morph.setDirect(null);
-		if (tick >= record.frames.size())
+		if (!applyFrame(record, tick))
 			return;
-		record.applyFrame(Math.max(0, tick - 1), actor, true); // Not tick, it's tick - 1
 		if (doAction && replay != null) {
 			record.applyPreviousMorph(actor, replay, tick, Record.MorphType.PAUSE);
 		}
-		Frame frame = record.frames.get(tick);
+		Frame frame = record.frames.get(Math.max(0, tick - 1));
 		actor.renderYawOffset = Blockbuster.actorPlaybackBodyYaw.get() && frame.hasBodyYaw ? frame.bodyYaw : frame.yaw;
 	}
 	
 	private static void applyPrevMorph(Record record, int tick, Replay replay, MorphAction from) {
-		if (tick >= record.frames.size())
+		refreshActor();
+		if (!applyFrame(record, tick))
 			return;
-		record.applyFrame(Math.max(0, tick - 1), actor, true); // Not tick, it's tick - 1
-
 		if (tick >= record.actions.size())
 			return;
 		FoundAction found = seekPrevMorphAction(record, tick, from);
@@ -85,16 +88,14 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 		}
 		int offset1 = tick - found.tick;
 		int offset2 = found.tick;
-		AbstractMorph morph1 = MorphUtils.copy(found.action.morph);
-		AbstractMorph morph2 = MorphUtils.copy(replay.morph);
+		MorphAction morphAction = found.action;
+		AbstractMorph prevMorph = replay.morph;
 		found = seekPrevMorphAction(record, found.tick, found.action);
 		if (found != null) {
 			offset2 -= found.tick;
-			morph2 = MorphUtils.copy(found.action.morph);
+			prevMorph = found.action.morph;
 		}
-		MorphUtils.pause(morph2, null, offset2);
-		MorphUtils.pause(morph1, morph2, offset1);
-		actor.morph.setDirect(morph1);
+		morphAction.applyWithOffset(actor, offset1, prevMorph, offset2);
 	}
 	
 	private static FoundAction seekPrevMorphAction(Record record, int tick, MorphAction from) {
@@ -122,6 +123,17 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 			first = -1;
 		}
 		return null;
+	}
+	
+	private static boolean applyFrame(Record record, int tick) {
+		if (tick >= record.frames.size())
+			return false;
+		int tick0 = Math.max(0, tick - 1); // Not tick, it's tick - 1
+		record.applyFrame(tick0, actor, true);
+
+		Frame frame = record.frames.get(tick0);
+		actor.renderYawOffset = Blockbuster.actorPlaybackBodyYaw.get() && tick > 0 && frame.hasBodyYaw ? frame.bodyYaw : frame.yaw;
+		return true;
 	}
 	
 	private GuiToggleElement showScene;
@@ -218,6 +230,8 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 			Record current = ClientProxy.manager.records.get(this.panel.record.filename);
 			if (current == null || current.frames == null || current.frames.isEmpty())
 				this.enableOnionSkin = false;
+			else
+				this.currentRecord = current;
 		}
 		if (this.enableOnionSkin) {
 			for (Replay replay : replays) {
@@ -232,7 +246,6 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 				this.onionSkinMap.put(replay, new OnionSkin());
 			}
 			
-			this.currentRecord = this.panel.record;
 			this.tick = this.panel.selector.tick;
 			this.offset = getMorphOffset();
 			OnionSkinManager.setOnionSkins(this.onionSkinMap.values().toArray(new OnionSkin[0]));
@@ -255,12 +268,14 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 					// Onion Skin
 					lighting = false;
 					color.set(1f, 1f, 0f, 0.5f);
-					if (!this.showOnionSkin.isToggled() || !this.showOnionSkin.isVisible() || actualTick == 0)
+					if (!this.showOnionSkin.isToggled() || !this.showOnionSkin.isVisible())
 						actor.morph.setDirect(null);
 					else if (this.offset == 0)
 						applyPrevMorph(ClientProxy.manager.records.get(replay.id), this.tick, replay, this.action);
 					else
 						applyRecord(ClientProxy.manager.records.get(replay.id), this.tick, replay, true);
+					actor.renderYawOffset = actor.rotationYaw = yaw;
+					actor.rotationPitch = 0;
 				} else {
 					// Scene
 					lighting = true;
