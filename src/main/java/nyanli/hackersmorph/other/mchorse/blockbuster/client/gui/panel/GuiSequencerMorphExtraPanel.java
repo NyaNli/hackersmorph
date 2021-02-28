@@ -321,10 +321,7 @@ public class GuiSequencerMorphExtraPanel extends GuiSequencerMorphPanel {
 					this.lastTick = context.tick;
 				} catch (Exception e) {}
 			}
-			float yaw = this.yaw;
-			this.yaw = 0;
 			super.drawUserModel(context);
-			this.yaw = yaw;
 		}
 		
 		public int getOffsetTick(GuiContext context) {

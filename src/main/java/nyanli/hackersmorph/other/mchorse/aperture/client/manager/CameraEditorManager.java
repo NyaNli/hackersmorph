@@ -43,6 +43,7 @@ public class CameraEditorManager {
 	}
 
 	public static void onGuiClose() {
+		curves.clear();
 		RenderManager.disableAll();
 		ShaderManager.disableAll();
 		DamageControlChecker.setEnable(true);

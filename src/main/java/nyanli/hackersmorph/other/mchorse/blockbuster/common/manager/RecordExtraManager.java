@@ -163,6 +163,13 @@ public class RecordExtraManager {
 			actor.setDead();
 	}
 	
+	public static void playerGoTo(Record record, int tick, EntityLivingBase actor, boolean force, RecordPlayer player) {
+		if ((player.playing || Blockbuster.recordPausePreview.get()) && tick > 0)
+			applyPrevFrame(actor, record, tick, force);
+		else
+			record.applyFrame(tick, actor, force);
+	}
+	
 	public static void playerGoTo(Record record, int tick, EntityLivingBase actor, boolean force, boolean realPlayer, RecordPlayer player) {
 		if ((player.playing || Blockbuster.recordPausePreview.get()) && tick > 0)
 			applyPrevFrame(actor, record, tick, force, realPlayer);
@@ -185,8 +192,35 @@ public class RecordExtraManager {
 				tick = 0;
 			else if (tick >= playback.record.frames.size())
 				tick = playback.record.frames.size() - 1;
-			applyPrevFrame(actor, playback.record, tick, true, playback.realPlayer);
+			try {
+				playback.getClass().getField("realPlayer");
+				applyPrevFrame(actor, playback.record, tick, true, playback.realPlayer);
+			} catch (NoSuchFieldException | SecurityException e) {
+				applyPrevFrame(actor, playback.record, tick, true);
+			}
 		}
+	}
+	
+	private static void applyPrevFrame(EntityLivingBase actor, Record record, int tick, boolean force) {
+		if (tick < 0 || tick >= record.frames.size())
+			return;
+		int prev = Math.max(tick - 1, 0);
+		record.applyFrame(prev, actor, force);
+		Frame frame = record.frames.get(prev);
+		if (actor.world.isRemote && frame.hasBodyYaw)
+			actor.prevRenderYawOffset = actor.renderYawOffset = frame.bodyYaw;
+		actor.lastTickPosX = actor.prevPosX = actor.posX;
+		actor.lastTickPosY = actor.prevPosY = actor.posY;
+		actor.lastTickPosZ = actor.prevPosZ = actor.posZ;
+		actor.prevRotationPitch = actor.rotationPitch;
+		actor.prevRotationYaw = actor.rotationYaw;
+		actor.prevRotationYawHead = actor.rotationYawHead;
+//		if (pause)
+//			return;
+//		record.applyFrame(tick, actor, force, realPlayer);
+//		frame = record.frames.get(tick);
+//		if (actor.world.isRemote && frame.hasBodyYaw)
+//			actor.renderYawOffset = frame.bodyYaw;
 	}
 	
 	private static void applyPrevFrame(EntityLivingBase actor, Record record, int tick, boolean force, boolean realPlayer) {

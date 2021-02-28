@@ -10,7 +10,7 @@ public class ClientHandlerStructureBiome extends ClientMessageHandler<PacketStru
 
 	@Override
 	public void run(EntityPlayerSP player, PacketStructure packet) {
-		StructureMorphExtraManager.update(packet.name, packet.tag);
+		StructureMorphExtraManager.updateRenderer(packet.name, packet.tag);
 	}
 
 }

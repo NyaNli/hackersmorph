@@ -7,10 +7,12 @@ import java.util.function.Consumer;
 import mchorse.blockbuster_pack.morphs.StructureMorph;
 import mchorse.mclib.client.gui.framework.elements.buttons.GuiButtonElement;
 import mchorse.mclib.client.gui.framework.elements.buttons.GuiToggleElement;
+import mchorse.mclib.client.gui.framework.elements.input.GuiTransformations;
 import mchorse.mclib.client.gui.framework.elements.list.GuiListElement;
 import mchorse.mclib.client.gui.framework.elements.list.GuiSearchListElement;
 import mchorse.mclib.client.gui.utils.keys.IKey;
 import mchorse.mclib.utils.keyframes.KeyframeChannel;
+import mchorse.metamorph.client.gui.editor.GuiAnimation;
 import mchorse.metamorph.client.gui.editor.GuiMorphPanel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -24,6 +26,7 @@ import nyanli.hackersmorph.other.mchorse.blockbuster.common.manager.StructureMor
 
 public class GuiStructureMorphPanel extends GuiMorphPanel<StructureMorph, GuiStructureMorph> {
 
+	private GuiAnimation anim;
 	private GuiButtonElement reload;
 	private GuiToggleElement topLevel;
 	private GuiToggleElement noNormal;
@@ -33,6 +36,7 @@ public class GuiStructureMorphPanel extends GuiMorphPanel<StructureMorph, GuiStr
 	private GuiButtonElement block;
 	private GuiCurveTool curve;
 	private GuiButtonElement reset;
+	private GuiTransformations trans;
 	
 	private GuiSearchListElement<String> biomes;
 	
@@ -40,6 +44,10 @@ public class GuiStructureMorphPanel extends GuiMorphPanel<StructureMorph, GuiStr
 	
 	public GuiStructureMorphPanel(Minecraft mc, GuiStructureMorph editor) {
 		super(mc, editor);
+		
+		this.anim = new GuiAnimation(mc, false);
+		this.anim.flex().relative(this).xy(120, 0).w(130);
+		
 		this.reload = new GuiButtonElement(mc, IKey.lang("hackersmorph.gui.structure.reload"), btn -> StructureMorphExtraManager.removeRenderer(this.morph));
 		this.reload.flex().relative(this).xy(10, 10).w(110);
 		this.reload.tooltip(IKey.lang("hackersmorph.gui.structure.reload.tooltip"));
@@ -101,19 +109,55 @@ public class GuiStructureMorphPanel extends GuiMorphPanel<StructureMorph, GuiStr
 		this.biomes.resize();
 		this.biomes.list.scroll.scrollSpeed = 15;
 		
-		this.add(this.reload, this.topLevel, this.noNormal, this.standalone, this.custom, this.sky, this.block, this.curve, this.reset, this.biomes);
+		this.trans = new GuiTransformations(mc) {
+
+			@Override
+			public void setT(double x, double y, double z) {
+				prop.translate.x = (float) x;
+				prop.translate.y = (float) y;
+				prop.translate.z = (float) z;
+			}
+
+			@Override
+			public void setS(double x, double y, double z) {
+				prop.scale.x = (float) x;
+				prop.scale.y = (float) y;
+				prop.scale.z = (float) z;
+			}
+
+			@Override
+			public void setR(double x, double y, double z) {
+				prop.rotate.x = (float) x;
+				prop.rotate.y = (float) y;
+				prop.rotate.z = (float) z;
+			}
+			
+		};
+		this.trans.flex().relative(this.area).x(0.5f, -95).y(1.0f, -10).wh(190, 70).anchorY(1.0f);
+		
+		this.add(this.anim, this.reload, this.topLevel, this.noNormal, this.standalone, this.custom, this.sky, this.block, this.curve, this.reset, this.biomes, this.trans);
 	}
 	
 	@Override
 	public void fillData(StructureMorph morph) {
 		super.fillData(morph);
+		
 		this.prop = StructureMorphExtraManager.getExProps(morph);
+		
+		this.anim.fill(this.prop.anim);
+		
 		this.topLevel.toggled(this.prop.topLevel);
 		this.noNormal.toggled(this.prop.fakeNormal);
 		this.standalone.toggled(!this.prop.acceptLighting);
 		this.custom.toggled(this.prop.custom);
+		
 		this.biomes.filter("", true);
 		this.biomes.list.setCurrent(this.prop.biome);
+		
+		this.trans.fillT(prop.translate.x, prop.translate.y, prop.translate.z);
+		this.trans.fillS(prop.scale.x, prop.scale.y, prop.scale.z);
+		this.trans.fillR(prop.rotate.x, prop.rotate.y, prop.rotate.z);
+		
 		showCustomPanel(!this.prop.acceptLighting);
 		setCurve(false);
 	}

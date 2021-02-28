@@ -1,5 +1,8 @@
 package nyanli.hackersmorph.other.mchorse.blockbuster;
 
+import org.lwjgl.opengl.GL11;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -41,6 +44,8 @@ public class ASM extends ClassTransformer {
 	private static final String ClientProxy = "mchorse/blockbuster/ClientProxy";
 	private static final String RecordManager = "mchorse/blockbuster/recording/RecordManager";
 	private static final String PacketRequestedFrames = "mchorse/blockbuster/network/common/recording/PacketRequestedFrames";
+	private static final String StructureRenderer = "mchorse/blockbuster_pack/morphs/StructureMorph$StructureRenderer";
+	private static final String GuiModelRenderer = "mchorse/mclib/client/gui/framework/elements/GuiModelRenderer";
 	
 	private static final String TypeClientHandlerStructure = "Lmchorse/blockbuster/network/client/ClientHandlerStructure;";
 	
@@ -203,6 +208,127 @@ public class ASM extends ClassTransformer {
 		@Patcher.Class
 		public static void addExtraProp(ClassNode clazz) {
 			clazz.visitField(Opcodes.ACC_PUBLIC, "asmExtraProps", "Lnyanli/hackersmorph/other/mchorse/blockbuster/common/manager/StructureMorphExtraManager$ExtraProps;", null, null).visitEnd();
+			clazz.interfaces.add("mchorse/metamorph/api/morphs/utils/IAnimationProvider");
+			clazz.interfaces.add("mchorse/metamorph/api/morphs/utils/ISyncableMorph");
+			// Generate by Bytecode Outline
+			{
+				MethodVisitor mv = clazz.visitMethod(Opcodes.ACC_PUBLIC, "update",
+						"(Lnet/minecraft/entity/EntityLivingBase;)V", null, null);
+				mv.visitCode();
+				Label l0 = new Label();
+				mv.visitLabel(l0);
+				mv.visitLineNumber(15, l0);
+				mv.visitVarInsn(Opcodes.ALOAD, 0);
+				mv.visitVarInsn(Opcodes.ALOAD, 1);
+				mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "mchorse/metamorph/api/morphs/AbstractMorph", "update",
+						"(Lnet/minecraft/entity/EntityLivingBase;)V", false);
+				Label l1 = new Label();
+				mv.visitLabel(l1);
+				mv.visitLineNumber(16, l1);
+				mv.visitVarInsn(Opcodes.ALOAD, 0);
+				mv.visitVarInsn(Opcodes.ALOAD, 1);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+						StructureMorphExtraManager,
+						"update",
+						"(Lmchorse/blockbuster_pack/morphs/StructureMorph;Lnet/minecraft/entity/EntityLivingBase;)V",
+						false);
+				Label l2 = new Label();
+				mv.visitLabel(l2);
+				mv.visitLineNumber(17, l2);
+				mv.visitInsn(Opcodes.RETURN);
+				Label l3 = new Label();
+				mv.visitLabel(l3);
+				mv.visitLocalVariable("this", "Lmchorse/blockbuster_pack/morphs/StructureMorph;", null, l0, l3, 0);
+				mv.visitLocalVariable("target", "Lnet/minecraft/entity/EntityLivingBase;", null, l0, l3, 1);
+				mv.visitMaxs(2, 2);
+				mv.visitEnd();
+			}
+			{
+				MethodVisitor mv = clazz.visitMethod(Opcodes.ACC_PUBLIC, "canMerge",
+						"(Lmchorse/metamorph/api/morphs/AbstractMorph;)Z", null, null);
+				mv.visitCode();
+				Label l0 = new Label();
+				mv.visitLabel(l0);
+				mv.visitLineNumber(21, l0);
+				mv.visitVarInsn(Opcodes.ALOAD, 0);
+				mv.visitVarInsn(Opcodes.ALOAD, 1);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+						StructureMorphExtraManager,
+						"canMerge",
+						"(Lmchorse/blockbuster_pack/morphs/StructureMorph;Lmchorse/metamorph/api/morphs/AbstractMorph;)Z",
+						false);
+				mv.visitInsn(Opcodes.IRETURN);
+				Label l1 = new Label();
+				mv.visitLabel(l1);
+				mv.visitLocalVariable("this", "Lmchorse/blockbuster_pack/morphs/StructureMorph;", null, l0, l1, 0);
+				mv.visitLocalVariable("morph", "Lmchorse/metamorph/api/morphs/AbstractMorph;", null, l0, l1, 1);
+				mv.visitMaxs(2, 2);
+				mv.visitEnd();
+			}
+			{
+				MethodVisitor mv = clazz.visitMethod(Opcodes.ACC_PUBLIC, "pause",
+						"(Lmchorse/metamorph/api/morphs/AbstractMorph;I)V", null, null);
+				mv.visitCode();
+				Label l0 = new Label();
+				mv.visitLabel(l0);
+				mv.visitLineNumber(26, l0);
+				mv.visitVarInsn(Opcodes.ALOAD, 0);
+				mv.visitVarInsn(Opcodes.ALOAD, 1);
+				mv.visitVarInsn(Opcodes.ILOAD, 2);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+						StructureMorphExtraManager,
+						"pause",
+						"(Lmchorse/blockbuster_pack/morphs/StructureMorph;Lmchorse/metamorph/api/morphs/AbstractMorph;I)V",
+						false);
+				Label l1 = new Label();
+				mv.visitLabel(l1);
+				mv.visitLineNumber(27, l1);
+				mv.visitInsn(Opcodes.RETURN);
+				Label l2 = new Label();
+				mv.visitLabel(l2);
+				mv.visitLocalVariable("this", "Lmchorse/blockbuster_pack/morphs/StructureMorph;", null, l0, l2, 0);
+				mv.visitLocalVariable("previous", "Lmchorse/metamorph/api/morphs/AbstractMorph;", null, l0, l2, 1);
+				mv.visitLocalVariable("offset", "I", null, l0, l2, 2);
+				mv.visitMaxs(3, 3);
+				mv.visitEnd();
+			}
+			{
+				MethodVisitor mv = clazz.visitMethod(Opcodes.ACC_PUBLIC, "isPaused", "()Z", null, null);
+				mv.visitCode();
+				Label l0 = new Label();
+				mv.visitLabel(l0);
+				mv.visitLineNumber(31, l0);
+				mv.visitVarInsn(Opcodes.ALOAD, 0);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+						StructureMorphExtraManager,
+						"isPause", "(Lmchorse/blockbuster_pack/morphs/StructureMorph;)Z", false);
+				mv.visitInsn(Opcodes.IRETURN);
+				Label l1 = new Label();
+				mv.visitLabel(l1);
+				mv.visitLocalVariable("this", "Lmchorse/blockbuster_pack/morphs/StructureMorph;", null, l0, l1, 0);
+				mv.visitMaxs(1, 1);
+				mv.visitEnd();
+			}
+			{
+				MethodVisitor mv = clazz.visitMethod(Opcodes.ACC_PUBLIC, "getAnimation",
+						"()Lmchorse/metamorph/api/morphs/utils/Animation;", null, null);
+				mv.visitCode();
+				Label l0 = new Label();
+				mv.visitLabel(l0);
+				mv.visitLineNumber(36, l0);
+				mv.visitVarInsn(Opcodes.ALOAD, 0);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+						StructureMorphExtraManager,
+						"getAnimation",
+						"(Lmchorse/blockbuster_pack/morphs/StructureMorph;)Lmchorse/metamorph/api/morphs/utils/Animation;",
+						false);
+				mv.visitInsn(Opcodes.ARETURN);
+				Label l1 = new Label();
+				mv.visitLabel(l1);
+				mv.visitLocalVariable("this", "Lmchorse/blockbuster_pack/morphs/StructureMorph;", null, l0, l1, 0);
+				mv.visitMaxs(1, 1);
+				mv.visitEnd();
+			}
 		}
 		
 		@Patcher.Method("fromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V")
@@ -244,12 +370,37 @@ public class ASM extends ClassTransformer {
 		@Patcher.Method("render(Lnet/minecraft/entity/EntityLivingBase;DDDFF)V")
 		@Patcher.Method("renderOnScreen(Lnet/minecraft/entity/player/EntityPlayer;IIFF)V")
 		public static void render(MethodNode method) {
+			// GL11.glRotatef(180 - entityYaw, 0, 1, 0);
 			// StructureMorphExtraManager.getRenderer(STRUCTURES, this.structure, this)
 			insertNode(method,
 					queryNode(method, node -> node.getOpcode() == Opcodes.INVOKEINTERFACE),
 					InsertPos.REPLACE,
 					new VarInsnNode(Opcodes.ALOAD, 0),
 					new MethodInsnNode(Opcodes.INVOKESTATIC, StructureMorphExtraManager, "getRenderer", "(Ljava/util/Map;Ljava/lang/String;Lmchorse/blockbuster_pack/morphs/StructureMorph;)Ljava/lang/Object;", false)
+			);
+			if ("render".equals(method.name)) {
+				LabelNode label = new LabelNode();
+				insertNode(method,
+						queryContinue(
+								node -> node.getOpcode() == Opcodes.INVOKEVIRTUAL,
+								node -> "render".equals(((MethodInsnNode) node).name),
+								node -> StructureRenderer.equals(((MethodInsnNode) node).owner)
+						),
+						InsertPos.BEFORE,
+						new VarInsnNode(Opcodes.ALOAD, 0),
+						new VarInsnNode(Opcodes.ALOAD, 1),
+						new VarInsnNode(Opcodes.FLOAD, 9),
+						new MethodInsnNode(Opcodes.INVOKESTATIC, StructureMorphExtraManager, "beforeRender", "(Lmchorse/blockbuster_pack/morphs/StructureMorph;Lnet/minecraft/entity/EntityLivingBase;F)V", false)
+				);
+			}
+		}
+		
+		@Patcher.Method("cleanUp()V")
+		public static void clearUp(MethodNode method) {
+			insertNode(method,
+					method.instructions.getFirst(),
+					InsertPos.AFTER,
+					new MethodInsnNode(Opcodes.INVOKESTATIC, StructureMorphExtraManager, "clearAll", "()V", false)
 			);
 		}
 		
@@ -759,15 +910,17 @@ public class ASM extends ClassTransformer {
 		
 		@Patcher.Method("goTo(IZ)V")
 		public static void goTo(MethodNode method) {
+			MethodInsnNode target = (MethodInsnNode)queryNode(method,
+					node -> node.getOpcode() == Opcodes.INVOKEVIRTUAL,
+					node -> "applyFrame".equals(((MethodInsnNode)node).name),
+					node -> Record.equals(((MethodInsnNode)node).owner)
+			);
+			String desc = target.desc.replace("(", "(Lmchorse/blockbuster/recording/data/Record;").replace(")V", "Lmchorse/blockbuster/recording/RecordPlayer;)V");
 			insertNode(method,
-					queryNode(method,
-							node -> node.getOpcode() == Opcodes.INVOKEVIRTUAL,
-							node -> "applyFrame".equals(((MethodInsnNode)node).name),
-							node -> Record.equals(((MethodInsnNode)node).owner)
-					),
+					target,
 					InsertPos.REPLACE,
 					new VarInsnNode(Opcodes.ALOAD, 0),
-					new MethodInsnNode(Opcodes.INVOKESTATIC, RecordExtraManager, "playerGoTo", "(Lmchorse/blockbuster/recording/data/Record;ILnet/minecraft/entity/EntityLivingBase;ZZLmchorse/blockbuster/recording/RecordPlayer;)V", false)
+					new MethodInsnNode(Opcodes.INVOKESTATIC, RecordExtraManager, "playerGoTo", desc, false)
 			);
 		}
 		

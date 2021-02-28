@@ -60,6 +60,21 @@ public class ASM extends ClassTransformer {
 			);
 		}
 		
+		@Patcher.Method("updatePlayer(JF)V")
+		public static void updatePlayer(MethodNode method) {
+			insertNode(method,
+					queryNode(method,
+							node -> node.getOpcode() == Opcodes.INVOKEVIRTUAL,
+							node -> "applyCurves".equals(((MethodInsnNode)node).name),
+							node -> "(JF)V".equals(((MethodInsnNode)node).desc)
+					),
+					InsertPos.BEFORE,
+					new InsnNode(Opcodes.POP),
+					new VarInsnNode(Opcodes.ALOAD, 0),
+					new FieldInsnNode(Opcodes.GETFIELD, GuiCameraEditor, "lastPartialTick", "F")
+			);
+		}
+		
 	}
 	
 	@Patcher("mchorse.aperture.client.gui.GuiProfilesManager")

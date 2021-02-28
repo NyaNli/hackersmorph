@@ -57,4 +57,16 @@ public class MorphAnimUtils {
 					updateTick(part.morph.get(), tick);
 	}
 	
+	public static void setDuration(AbstractMorph morph, float duration) {
+//		if (tick <= 0) return;
+		if (morph instanceof IAnimationProvider) {
+			Animation anim = ((IAnimationProvider) morph).getAnimation();
+			anim.duration = (int) duration;
+		}
+		if (morph instanceof IBodyPartProvider)
+			for (BodyPart part : ((IBodyPartProvider) morph).getBodyPart().parts)
+				if (!part.morph.isEmpty())
+					setDuration(part.morph.get(), duration);
+	}
+	
 }

@@ -15,7 +15,7 @@ import nyanli.hackersmorph.config.Config;
 import nyanli.hackersmorph.side.CommonProxy;
 
 //@Mod(modid = HackersMorph.MODID, name = "Hacker's Morph", version = "0.0.0.1", dependencies = "required-after:mclib@[2.0.3,);required-after:blockbuster@[2.0,);after:aperture@[1.4.2,);after:emoticons", guiFactory="nyanli.hackersmorph.config.ConfigFactory")
-@Mod(modid = HackersMorph.MODID, name = "Hacker's Morph", version = "0.0.0.1", dependencies = "required-after:blockbuster@[2.1,);after:aperture@[1.5,);after:emoticons", guiFactory="nyanli.hackersmorph.config.ConfigFactory")
+@Mod(modid = HackersMorph.MODID, name = "Hacker's Morph", version = "0.0.0.1", dependencies = "required-after:blockbuster@[2.1,2.2.2];after:aperture@[1.5,1.5.2];after:emoticons", guiFactory="nyanli.hackersmorph.config.ConfigFactory")
 public class HackersMorph {
 	
 	public static final String MODID = "hackersmorph";

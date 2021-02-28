@@ -74,7 +74,7 @@ public class OnionSkinManager {
 		entity.prevRenderYawOffset = entity.renderYawOffset = skin.yawOffset;
 		entity.prevRotationYaw = entity.rotationYaw = entity.prevRotationYawHead = entity.rotationYawHead = skin.yaw;
 		GlStateManager.pushMatrix();
-		MorphUtils.render(skin.morph, entity, skin.offset.x, skin.offset.y, skin.offset.z, skin.yaw, 0); // No looking
+		MorphUtils.render(skin.morph, entity, skin.offset.x, skin.offset.y, skin.offset.z, 0, 0);
 		GlStateManager.popMatrix();
 		entity.prevRotationPitch = prevPitch;
 		entity.prevRenderYawOffset = prevYawOffset;

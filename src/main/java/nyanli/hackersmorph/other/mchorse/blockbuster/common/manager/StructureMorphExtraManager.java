@@ -1,6 +1,8 @@
 package nyanli.hackersmorph.other.mchorse.blockbuster.common.manager;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,8 +29,13 @@ import mchorse.blockbuster.network.common.structure.PacketStructureRequest;
 import mchorse.blockbuster_pack.morphs.StructureMorph;
 import mchorse.blockbuster_pack.morphs.StructureMorph.StructureRenderer;
 import mchorse.mclib.client.gui.framework.elements.GuiModelRenderer;
+import mchorse.mclib.utils.Interpolations;
+import mchorse.mclib.utils.NBTUtils;
 import mchorse.mclib.utils.keyframes.Keyframe;
 import mchorse.mclib.utils.keyframes.KeyframeChannel;
+import mchorse.metamorph.api.models.IMorphProvider;
+import mchorse.metamorph.api.morphs.AbstractMorph;
+import mchorse.metamorph.api.morphs.utils.Animation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -48,8 +55,10 @@ import net.minecraft.client.renderer.vertex.VertexFormatElement.EnumUsage;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Biomes;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
@@ -73,6 +82,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import nyanli.hackersmorph.HackersMorph;
 import nyanli.hackersmorph.util.MatrixTools;
 
 // 存储结构伪装的生物群系NBT，以及光照修正
@@ -116,14 +126,14 @@ public class StructureMorphExtraManager {
 				Dispatcher.sendToServer(new PacketStructureRequest(structure));
 				waiting.add(structure);
 			}
-			return StructureLoadingRenderer.getRenderer(structure);
+			return StructureLoadingRenderer.getRenderer(structure, false);
 		}
 		ExtraProps prop = getExProps(morph);
 		String key = structure + '>' + prop.biome;
 		if (renderers.get(key) == null) {
 			StructureVertexRenderer renderer = generateRenderer(structure, prop.biome);
-			if (renderer == null)
-				return StructureLoadingRenderer.getRenderer(structure);
+			if (renderer == null || renderer == StructureVertexRenderer.EMPTY)
+				return StructureLoadingRenderer.getRenderer(structure, renderer == StructureVertexRenderer.EMPTY);
 			renderers.put(key, renderer);
 		}
 		return renderers.get(key).props(prop);
@@ -144,13 +154,10 @@ public class StructureMorphExtraManager {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public static void update(String structure, NBTTagCompound tag) {
+	public static void updateRenderer(String structure, NBTTagCompound tag) {
 		waiting.remove(structure);
 		NBTTagCompound old = structures.put(structure, tag);
-		if (!Objects.equals(old, tag)) {
-			TemplateLoader.removeTemplate(old);
-			TemplateLoader.addTemplate(tag);
-		}
+		TemplateLoader.addTemplate(tag, old);
 		Iterator<Entry<String, StructureVertexRenderer>> iterator = renderers.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, StructureVertexRenderer> entry = iterator.next();
@@ -159,6 +166,14 @@ public class StructureMorphExtraManager {
 				iterator.remove();
 			}
 		}
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public static void clearAll() {
+		waiting.clear();
+		TemplateLoader.removeAll();
+		structures.clear();
+		renderers.clear();
 	}
 	
 	public static ExtraProps getExProps(StructureMorph morph) {
@@ -184,7 +199,84 @@ public class StructureMorphExtraManager {
 		}
 	}
 	
-
+	public static void beforeRender(StructureMorph morph, EntityLivingBase entity, float partialTicks) {
+		ExtraProps prop = getExProps(morph);
+		prop.anim.calcTSR(prop, partialTicks);
+		float entityYaw = Interpolations.lerpYaw(entity.prevRotationYaw, entity.rotationYaw, partialTicks);
+		if (renderers.get(morph.structure + '>' + prop.biome) == null)
+			entityYaw = 180;
+		GL11.glRotatef(180f - entityYaw, 0, 1, 0);
+	}
+	
+	// Animation
+	
+	public static void update(StructureMorph self, EntityLivingBase target) {
+		if (target.world.isRemote) {
+			ExtraProps prop = getExProps(self);
+			prop.anim.update();
+			prop.anim.calcTSR(prop, 0);
+		}
+	}
+	
+	public static boolean canMerge(StructureMorph self, AbstractMorph morph) {
+		if (morph instanceof StructureMorph) {
+			try {
+				Method m = AbstractMorph.class.getDeclaredMethod("mergeBasic", AbstractMorph.class);
+				m.setAccessible(true);
+				m.invoke(self, morph);
+			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {}
+			
+			ExtraProps prop = getExProps(self);
+//			ExtraProps prop2 = getExProps((StructureMorph) morph);
+			TransAnimation anim = prop.anim;
+//			if (!prop2.anim.ignored) {
+//			anim.calcTSR(prop, 0);
+//			Vector3f lastTranslate = new Vector3f(anim.translate);
+//			Vector3f lastScale = new Vector3f(anim.scale);
+//			Vector3f lastRotate = new Vector3f(anim.rotate);
+			
+			// As same as emoticon animation
+			Vector3f lastTranslate = new Vector3f(prop.translate);
+			Vector3f lastScale = new Vector3f(prop.scale);
+			Vector3f lastRotate = new Vector3f(prop.rotate);
+//			}
+			self.copy(morph);
+			anim.progress = 0;
+//			if (!anim.ignored) {
+			anim.lastTranslate.set(lastTranslate);
+			anim.lastScale.set(lastScale);
+			anim.lastRotate.set(lastRotate);
+//			}
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean isPause(StructureMorph self) {
+		return getExProps(self).anim.paused;
+	}
+	
+	public static void pause(StructureMorph self, AbstractMorph previous, int offset) {
+		ExtraProps prop = getExProps(self);
+		prop.anim.pause(offset);
+		if (previous instanceof IMorphProvider) {
+			previous = ((IMorphProvider) previous).getMorph();
+		}
+		if (previous instanceof StructureMorph) {
+			ExtraProps pp = getExProps((StructureMorph) previous);
+//			pp.anim.calcTSR(pp, 0);
+//			prop.anim.lastTranslate.set(pp.anim.translate);
+//			prop.anim.lastScale.set(pp.anim.scale);
+//			prop.anim.lastRotate.set(pp.anim.rotate);
+			prop.anim.lastTranslate.set(pp.translate);
+			prop.anim.lastScale.set(pp.scale);
+			prop.anim.lastRotate.set(pp.rotate);
+		}
+	}
+	
+	public static Animation getAnimation(StructureMorph self) {
+		return getExProps(self).anim;
+	}
 
     /**
      * Reference from Blockbuster Mod
@@ -201,8 +293,10 @@ public class StructureMorphExtraManager {
 
 		TemplateLoader world = TemplateLoader.getInstance();
 		BlockPos size = world.loadTemplate(structures.get(structure));
-		if (size.equals(BlockPos.ORIGIN))
+		if (size == null)
 			return null;
+		if (size.equals(BlockPos.ORIGIN))
+			return StructureVertexRenderer.EMPTY;
 		
 		BlockPos origin = TemplateLoader.origin;
 		world.setBiome(biome);
@@ -312,6 +406,10 @@ public class StructureMorphExtraManager {
 		public boolean topLevel = false;
 		public boolean fakeNormal = false;
 		public Vector3f normal = new Vector3f(0, 1, 0);
+		public Vector3f translate = new Vector3f(0, 0, 0);
+		public Vector3f scale = new Vector3f(1, 1, 1);
+		public Vector3f rotate = new Vector3f(0, -180, 0); // Compatible with older versions
+		public TransAnimation anim = new TransAnimation(this);
 		
 		private byte[] cacheSky = new byte[256];
 		private int cacheSkyHash = -1;
@@ -328,11 +426,15 @@ public class StructureMorphExtraManager {
 						&& (!this.custom || this.skyCurve.equals(p.skyCurve) && this.blockCurve.equals(p.blockCurve))
 						&& this.topLevel == p.topLevel
 						&& this.fakeNormal == p.fakeNormal
-						&& (!this.fakeNormal || this.normal.equals(p.normal));
+						&& (!this.fakeNormal || this.normal.equals(p.normal))
+						&& this.translate.equals(p.translate)
+						&& this.scale.equals(p.scale)
+						&& this.rotate.equals(p.rotate)
+						&& this.anim.equals(p.anim);
 			}
 			return false;
 		}
-		
+
 		public void copy(ExtraProps prop) {
 			this.biome = prop.biome;
 			this.acceptLighting = prop.acceptLighting;
@@ -342,6 +444,12 @@ public class StructureMorphExtraManager {
 			this.topLevel = prop.topLevel;
 			this.fakeNormal = prop.fakeNormal;
 			this.normal.set(prop.normal);
+			this.translate.set(prop.translate);
+			this.scale.set(prop.scale);
+			this.rotate.set(prop.rotate);
+			this.anim.copy(prop.anim);
+			this.anim.reset(this);
+			
 		}
 
 		@Override
@@ -354,11 +462,14 @@ public class StructureMorphExtraManager {
 			nbt.setString("BlockCurve", CurveKeyframeChannel.toJson(this.blockCurve));
 			nbt.setBoolean("TopLevel", this.topLevel);
 			nbt.setBoolean("FakeNormal", this.fakeNormal);
-			NBTTagCompound normal = new NBTTagCompound();
-			normal.setFloat("x", this.normal.x);
-			normal.setFloat("y", this.normal.y);
-			normal.setFloat("z", this.normal.z);
-			nbt.setTag("Normal", normal);
+			nbt.setTag("Normal", NBTUtils.writeFloatList(new NBTTagList(), this.normal));
+			nbt.setTag("T", NBTUtils.writeFloatList(new NBTTagList(), this.translate));
+			nbt.setTag("S", NBTUtils.writeFloatList(new NBTTagList(), this.scale));
+			nbt.setTag("R", NBTUtils.writeFloatList(new NBTTagList(), this.rotate));
+			NBTTagCompound anim = this.anim.toNBT();
+			if (!anim.isEmpty())
+				nbt.setTag("Animation", anim);
+			
 			return nbt;
 		}
 
@@ -384,9 +495,66 @@ public class StructureMorphExtraManager {
 				this.topLevel = nbt.getBoolean("TopLevel");
 			if (nbt.hasKey("FakeNormal", 1))
 				this.fakeNormal = nbt.getBoolean("FakeNormal");
-			if (nbt.hasKey("Normal", 10)) {
-				NBTTagCompound normal = nbt.getCompoundTag("Normal");
-				this.normal.set(normal.getFloat("x"), normal.getFloat("y"), normal.getFloat("z"));
+			NBTUtils.readFloatList(nbt.getTagList("Normal", 5), this.normal);
+			NBTUtils.readFloatList(nbt.getTagList("T", 5), this.translate);
+			NBTUtils.readFloatList(nbt.getTagList("S", 5), this.scale);
+			NBTUtils.readFloatList(nbt.getTagList("R", 5), this.rotate);
+			if (nbt.hasKey("Animation", 10)) {
+				this.anim.fromNBT(nbt.getCompoundTag("Animation"));
+				this.anim.reset(this);
+			}
+			
+		}
+		
+	}
+	
+	public static class TransAnimation extends Animation {
+
+		public Vector3f lastTranslate = new Vector3f();
+		public Vector3f lastScale = new Vector3f();
+		public Vector3f lastRotate = new Vector3f();
+		
+		public Vector3f translate = new Vector3f();
+		public Vector3f scale = new Vector3f();
+		public Vector3f rotate = new Vector3f();
+		
+		public TransAnimation(ExtraProps prop) {
+			reset(prop);
+		}
+		
+		@Override
+		public float getFactor(float partialTicks) {
+			if (this.duration <= 0f)
+				return 1.0f;
+			return super.getFactor(partialTicks);
+		}
+
+		public void reset(ExtraProps prop) {
+			this.reset();
+			lastTranslate.set(prop.translate);
+			lastScale.set(prop.scale);
+			lastRotate.set(prop.rotate);
+			translate.set(prop.translate);
+			scale.set(prop.scale);
+			rotate.set(prop.rotate);
+		}
+		
+		public void calcTSR(ExtraProps prop, float partialTicks) {
+			if (this.isInProgress()) {
+				float factor = this.getFactor(partialTicks);
+				this.translate.x = this.interp.interpolate(this.lastTranslate.x, prop.translate.x, factor);
+				this.translate.y = this.interp.interpolate(this.lastTranslate.y, prop.translate.y, factor);
+				this.translate.z = this.interp.interpolate(this.lastTranslate.z, prop.translate.z, factor);
+				this.scale.x = this.interp.interpolate(this.lastScale.x, prop.scale.x, factor);
+				this.scale.y = this.interp.interpolate(this.lastScale.y, prop.scale.y, factor);
+				this.scale.z = this.interp.interpolate(this.lastScale.z, prop.scale.z, factor);
+				this.rotate.x = this.interp.interpolate(this.lastRotate.x, prop.rotate.x, factor);
+				this.rotate.y = this.interp.interpolate(this.lastRotate.y, prop.rotate.y, factor);
+				this.rotate.z = this.interp.interpolate(this.lastRotate.z, prop.rotate.z, factor);
+			} else {
+				this.translate.set(prop.translate);
+				this.scale.set(prop.scale);
+				this.rotate.set(prop.rotate);
 			}
 		}
 		
@@ -409,9 +577,13 @@ public class StructureMorphExtraManager {
 			return instance;
 		}
 		
-		public static void addTemplate(NBTTagCompound nbt) {
+		public static void addTemplate(NBTTagCompound nbt, NBTTagCompound old) {
+			if (nbt == null)
+				return;
 			lock.lock();
 			HashMap<NBTTagCompound, TemplateDataPack> map = new HashMap<>(cache);
+			if (old != null)
+				map.remove(old);
 			map.put(nbt, null);
 			cache = map;
 			lock.unlock();
@@ -422,6 +594,12 @@ public class StructureMorphExtraManager {
 			HashMap<NBTTagCompound, TemplateDataPack> map = new HashMap<>(cache);
 			map.remove(nbt);
 			cache = map;
+			lock.unlock();
+		}
+		
+		public static void removeAll() {
+			lock.lock();
+			cache = new HashMap<>();
 			lock.unlock();
 		}
 		
@@ -541,7 +719,7 @@ public class StructureMorphExtraManager {
 				this.tickableTileEntities.addAll(pack.tickableTileEntities);
 				return pack.size;
 			}
-	        return BlockPos.ORIGIN;
+	        return null;
 		}
 		
 		private static class TemplateChunkProvider implements IChunkProvider {
@@ -646,12 +824,14 @@ public class StructureMorphExtraManager {
 		
 		private static final StructureLoadingRenderer instance = new StructureLoadingRenderer();
 		
-		public static StructureLoadingRenderer getRenderer(String structure) {
+		public static StructureLoadingRenderer getRenderer(String structure, boolean empty) {
 			instance.structure = structure;
+			instance.empty = empty;
 			return instance;
 		}
 		
 		private String structure;
+		private boolean empty;
 		
 		private StructureLoadingRenderer() {
 			try {
@@ -666,6 +846,10 @@ public class StructureMorphExtraManager {
 
 		@Override
 		public void render() {
+			Minecraft mc = Minecraft.getMinecraft();
+			if (!GuiModelRenderer.isRendering() && (empty && !mc.gameSettings.showDebugInfo || mc.gameSettings.hideGUI))
+				return;
+			
         	/**
         	 * Reference from Blockbuster Mod
         	 * Url: https://github.com/mchorse/blockbuster
@@ -674,9 +858,9 @@ public class StructureMorphExtraManager {
         	 * 
         	 * mchorse.blockbuster.client.render.RenderActor.renderPlayerRecordingName(EntityActor, double, double, double)
         	 */
-			String str = I18n.format("hackersmorph.gui.structure.loading", this.structure);
-			FontRenderer font = Minecraft.getMinecraft().fontRenderer;
-			RenderManager mgr = Minecraft.getMinecraft().getRenderManager();
+			String str = I18n.format(empty ? "hackersmorph.gui.structure.empty" : "hackersmorph.gui.structure.loading", this.structure);
+			FontRenderer font = mc.fontRenderer;
+			RenderManager mgr = mc.getRenderManager();
 			float viewerYaw = mgr.playerViewY;
 			float viewerPitch = mgr.playerViewX;
 			boolean isThirdPersonFrontal = mgr.options.thirdPersonView == 2;
@@ -735,6 +919,8 @@ public class StructureMorphExtraManager {
 	
 	@SideOnly(Side.CLIENT)
 	public static class StructureVertexRenderer extends StructureRenderer {
+		
+		public static final StructureVertexRenderer EMPTY = new StructureVertexRenderer();
 
 		private VertexFormat lightOffNormal;
 		private VertexFormat lightOnNormal;
@@ -748,6 +934,8 @@ public class StructureMorphExtraManager {
 		private ExtraProps prop;
 		
 		private int renderTimes = 0;
+		
+		private StructureVertexRenderer() {}
 		
 		public StructureVertexRenderer(BufferBuilder buff, int[] fullCubeData, BlockPos size, Map<TileEntity, Integer> tes, Map<Entity, Integer> es) {
 			try {
@@ -799,6 +987,17 @@ public class StructureMorphExtraManager {
 
 		@Override
 		public void render() {
+			if (this.renderTimes >= 10 || GL11.glGetInteger(GL11.GL_MODELVIEW_STACK_DEPTH) >= GL11.glGetInteger(GL11.GL_MAX_MODELVIEW_STACK_DEPTH) - 4)
+				return;
+			
+			TransAnimation anim = prop.anim;
+//			GL11.glPushMatrix();
+			GL11.glTranslatef(anim.translate.x, anim.translate.y, anim.translate.z);
+			GL11.glRotatef(anim.rotate.z, 0, 0, 1);
+			GL11.glRotatef(anim.rotate.y, 0, 1, 0);
+			GL11.glRotatef(anim.rotate.x, 1, 0, 0);
+			GL11.glScaled(anim.scale.x, anim.scale.y, anim.scale.z);
+			
 			RenderHelper.disableStandardItemLighting();
 			if (GuiModelRenderer.isRendering() && !this.prop.acceptLighting)
 				Minecraft.getMinecraft().entityRenderer.enableLightmap();
@@ -822,12 +1021,23 @@ public class StructureMorphExtraManager {
 				if (GuiModelRenderer.isRendering())
 					Minecraft.getMinecraft().entityRenderer.disableLightmap();
 			}
+			
+//			GL11.glPopMatrix();
 		}
 
 		@Override
 		public void renderTEs() {
-			if (this.tes == null && this.es == null || this.renderTimes >= 10)
+			if (this.tes == null && this.es == null || this.renderTimes >= 10 || GL11.glGetInteger(GL11.GL_MODELVIEW_STACK_DEPTH) >= GL11.glGetInteger(GL11.GL_MAX_MODELVIEW_STACK_DEPTH) - 4)
 				return;
+
+//			TransAnimation anim = prop.anim;
+//			GL11.glPushMatrix();
+//			GL11.glTranslatef(anim.translate.x, anim.translate.y, anim.translate.z);
+//			GL11.glRotatef(anim.rotate.z, 0, 0, 1);
+//			GL11.glRotatef(anim.rotate.y, 0, 1, 0);
+//			GL11.glRotatef(anim.rotate.x, 1, 0, 0);
+//			GL11.glScaled(anim.scale.x, anim.scale.y, anim.scale.z);
+			
 			if (GuiModelRenderer.isRendering() && !this.prop.acceptLighting)
 				Minecraft.getMinecraft().entityRenderer.enableLightmap();
 			float lastX = OpenGlHelper.lastBrightnessX;
@@ -874,6 +1084,8 @@ public class StructureMorphExtraManager {
 				if (GuiModelRenderer.isRendering())
 					Minecraft.getMinecraft().entityRenderer.disableLightmap();
 			}
+			
+//			GL11.glPopMatrix();
 		}
 
 		@Override
