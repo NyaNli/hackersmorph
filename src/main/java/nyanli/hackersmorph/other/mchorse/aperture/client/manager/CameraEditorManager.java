@@ -1,9 +1,11 @@
 package nyanli.hackersmorph.other.mchorse.aperture.client.manager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import mchorse.aperture.camera.CameraProfile;
 import mchorse.aperture.client.gui.GuiCameraEditor;
 import mchorse.blockbuster.aperture.CameraHandler;
 import mchorse.blockbuster.network.Dispatcher;
@@ -53,7 +55,8 @@ public class CameraEditorManager {
 			Dispatcher.sendToServer(new PacketScenePlay(CameraHandler.get(), PacketScenePlay.STOP, 0));
 	}
 	
-	public static void onApplyCurves(Map<String, KeyframeChannel> channels, long progress, float partialTick) {
+	public static void onProfileApplyCurves(CameraProfile profile, long progress, float partialTick) {
+		Map<String, KeyframeChannel> channels = profile.getCurves();
 		for (ICurve curve : curves) {
 			KeyframeChannel channel = channels.get(curve.getId());
 			if (channel != null && !channel.isEmpty()) {

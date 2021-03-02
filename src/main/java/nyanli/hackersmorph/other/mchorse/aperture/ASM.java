@@ -111,10 +111,9 @@ public class ASM extends ClassTransformer {
 					method.instructions.getFirst(),
 					InsertPos.AFTER,
 					new VarInsnNode(Opcodes.ALOAD, 0),
-					new FieldInsnNode(Opcodes.GETFIELD, "mchorse/aperture/camera/CameraProfile", "curves", "Ljava/util/Map;"),
 					new VarInsnNode(Opcodes.LLOAD, 1),
 					new VarInsnNode(Opcodes.FLOAD, 3),
-					new MethodInsnNode(Opcodes.INVOKESTATIC, CameraEditorManager, "onApplyCurves", "(Ljava/util/Map;JF)V", false)
+					new MethodInsnNode(Opcodes.INVOKESTATIC, CameraEditorManager, "onProfileApplyCurves", "(Lmchorse/aperture/camera/CameraProfile;JF)V", false)
 			);
 		}
 		
@@ -124,9 +123,12 @@ public class ASM extends ClassTransformer {
 					queryNode(method, node -> node.getOpcode() == Opcodes.RETURN),
 					InsertPos.BEFORE,
 					new VarInsnNode(Opcodes.ALOAD, 0),
+					new MethodInsnNode(Opcodes.INVOKEVIRTUAL, CameraProfile, "getCurves", "()Ljava/util/Map;", false),
+					new InsnNode(Opcodes.DUP),
+					new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "clear", "()V", true),
 					new VarInsnNode(Opcodes.ALOAD, 1),
-					new FieldInsnNode(Opcodes.GETFIELD, CameraProfile, "curves", "Ljava/util/Map;"),
-					new FieldInsnNode(Opcodes.PUTFIELD, CameraProfile, "curves", "Ljava/util/Map;")
+					new MethodInsnNode(Opcodes.INVOKEVIRTUAL, CameraProfile, "getCurves", "()Ljava/util/Map;", false),
+					new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "putAll", "(Ljava/util/Map;)V", true)
 			);
 		}
 		
