@@ -18,6 +18,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import net.minecraft.client.renderer.GlStateManager;
 import nyanli.hackersmorph.asm.*;
 
 public class ASM extends ClassTransformer {
@@ -392,6 +393,17 @@ public class ASM extends ClassTransformer {
 						new VarInsnNode(Opcodes.FLOAD, 9),
 						new MethodInsnNode(Opcodes.INVOKESTATIC, StructureMorphExtraManager, "beforeRender", "(Lmchorse/blockbuster_pack/morphs/StructureMorph;Lnet/minecraft/entity/EntityLivingBase;F)V", false)
 				);
+			} else {
+				String name = isDeobfEnv ? "disableFog" : "func_179106_n";
+				insertNode(method,
+						queryContinue(
+								node -> node.getOpcode() == Opcodes.INVOKEVIRTUAL,
+								node -> "renderTEs".equals(((MethodInsnNode) node).name),
+								node -> StructureRenderer.equals(((MethodInsnNode) node).owner)
+						),
+						InsertPos.AFTER,
+						new MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/client/renderer/GlStateManager", name, "()V", false)
+				);
 			}
 		}
 		
@@ -688,6 +700,27 @@ public class ASM extends ClassTransformer {
 					new VarInsnNode(Opcodes.ALOAD, 0),
 					new VarInsnNode(Opcodes.ILOAD, 2),
 					new MethodInsnNode(Opcodes.INVOKESTATIC, SequencerMorphManager, "pause", "(Lmchorse/blockbuster_pack/morphs/SequencerMorph;I)V", false)
+			);
+		}
+		
+		// DANGER CODE
+		@Patcher.Method("updateMorph(F)V")
+		public static void updateMorph(MethodNode method) {
+			AbstractInsnNode node = queryNode(method, n -> n.getOpcode() == Opcodes.FCONST_0);
+			node = insertNode(method,
+					node,
+					InsertPos.REPLACE,
+					new LdcInsnNode(new Float(0.1f))
+			).getNext();
+			node = insertNode(method,
+					node,
+					InsertPos.REPLACE,
+					new InsnNode(Opcodes.FCMPG)
+			).getNext();
+			insertNode(method,
+					node,
+					InsertPos.REPLACE,
+					new JumpInsnNode(Opcodes.IFGT, ((JumpInsnNode)node).label)
 			);
 		}
 		

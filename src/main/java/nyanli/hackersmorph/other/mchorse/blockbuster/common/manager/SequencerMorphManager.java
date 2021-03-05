@@ -64,7 +64,7 @@ public class SequencerMorphManager {
 		double posX = entity.posX;
 		double posY = entity.posY;
 		double posZ = entity.posZ;
-		if (prop.repeatTimes > 0 && (times = getRepeatTimes(morph)) > 0) {
+		if (prop.repeatTimes > 0 && (times = getRepeatTimes(morph, partialTicks)) > 0) {
 			doOffset = true;
 			times %= prop.repeatTimes + 1;
 			Vec3d offset = new Vec3d(prop.offsetX * 0.0625 * times, prop.offsetY * 0.0625 * times, prop.offsetZ * 0.0625 * times);
@@ -190,13 +190,14 @@ public class SequencerMorphManager {
 		
 	}
 	
-	public static int getRepeatTimes(SequencerMorph morph) {
+	public static int getRepeatTimes(SequencerMorph morph, float partialTicks) {
 		if (morph.morphs.size() == 0 || morph.isRandom || getMaxDuration(morph) <= 0.0001)
 			return 0;
+		float timer = morph.timer + (morph.isPaused() ? 0 : partialTicks);
 		int times = 0;
 		int i = morph.reverse ? (morph.morphs.size() - 1) : 0;
 		float duration = morph.morphs.get(i).getDuration(getRandomSeed(0f));
-		for (; duration < morph.duration; 
+		for (; duration <= timer;
 				duration += morph.morphs.get(i).getDuration(getRandomSeed(duration))) {
 			i += morph.reverse ? -1 : 1;
 			if (i < 0 || i > morph.morphs.size() - 1) {
@@ -220,7 +221,7 @@ public class SequencerMorphManager {
 	}
 	
 	public static float getEntryDuration(SequencerMorph morph) {
-		if (morph.morphs.size() == 0 || getMaxDuration(morph) <= 0.0001)
+		if (morph.morphs.size() == 0 || getMaxDuration(morph) <= 0.0001f)
 			return 0;
 		int i = morph.isRandom ? morph.getRandomIndex(0f) : (morph.reverse ? (morph.morphs.size() - 1) : 0);
 		float duration = morph.morphs.get(i).getDuration(getRandomSeed(0f));
