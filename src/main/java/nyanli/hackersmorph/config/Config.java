@@ -19,8 +19,7 @@ public class Config {
 	
 	private Configuration forgeConfig;
 	private Property convertDefine;
-//	private Property forceSync;
-//	private Property forceSyncOffset;
+	private Property cameraMode;
 	
 	public Config(File configFile) {
 		forgeConfig = new Configuration(configFile);
@@ -35,13 +34,21 @@ public class Config {
 		return this.convertDefine.getBoolean();
 	}
 	
-//	public boolean canForceSync() {
-//		return this.forceSync.getBoolean();
-//	}
-//	
-//	public int getSyncOffset() {
-//		return this.forceSyncOffset.getInt();
-//	}
+	public Property getConfig(String category, String key, String defaultValue) {
+		return forgeConfig.get(category, key, defaultValue);
+	}
+	
+	public Property getConfig(String category, String key, boolean defaultValue) {
+		return forgeConfig.get(category, key, defaultValue);
+	}
+	
+	public Property getConfig(String category, String key, int defaultValue) {
+		return forgeConfig.get(category, key, defaultValue);
+	}
+	
+	public void save() {
+		forgeConfig.save();
+	}
 	
 	private void init() {
 		ConfigCategory category = forgeConfig.getCategory("experimental");
@@ -49,12 +56,6 @@ public class Config {
 		convertDefine = forgeConfig.get("experimental", "convertdef", false);
 		convertDefine.setLanguageKey("hackersmorph.config.experimental.convertdef");
 		convertDefine.setComment(I18n.translateToLocal("hackersmorph.config.experimental.convertdef.comment"));
-//		forceSync = forgeConfig.get("experimental", "forcesync", false);
-//		forceSync.setLanguageKey("hackersmorph.config.experimental.forcesync");
-//		forceSync.setComment(I18n.translateToLocal("hackersmorph.config.experimental.forcesync.comment"));
-//		forceSyncOffset = forgeConfig.get("experimental", "forcesyncoffset", -1);
-//		forceSyncOffset.setLanguageKey("hackersmorph.config.experimental.forcesyncoffset");
-//		forceSyncOffset.setComment(I18n.translateToLocal("hackersmorph.config.experimental.forcesyncoffset.comment"));
 	}
     
     @SubscribeEvent

@@ -68,7 +68,14 @@ public class GuiSnowstormEditorPanel extends GuiMorphPanel<SnowstormMorph, GuiSn
         editor.getProxy().editor.resize();
     }
 	
-    /**
+    @Override
+	public void finishEditing() {
+		for (GuiSnowstormSection section : editor.getProxy().sections)
+        	section.beforeSave(this.morph.getEmitter().scheme);
+		super.finishEditing();
+	}
+
+	/**
      * Reference from Blockbuster Mod
 	 * Url: https://github.com/mchorse/blockbuster
 	 * Author: mchorse

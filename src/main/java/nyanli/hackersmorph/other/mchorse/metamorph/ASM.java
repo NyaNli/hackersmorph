@@ -109,10 +109,10 @@ private static final String GuiBodyPartEditor = "mchorse/metamorph/bodypart/GuiB
 							node -> "drawUserModel".equals(((MethodInsnNode)node).name),
 							node -> "mchorse/mclib/client/gui/framework/elements/GuiModelRenderer".equals(((MethodInsnNode)node).owner)
 					),
-					InsertPos.BEFORE,
-					new MethodInsnNode(Opcodes.INVOKESTATIC, OnionSkinManager, "beforeRenderModel", "(Lmchorse/mclib/client/gui/framework/elements/GuiModelRenderer;Lmchorse/mclib/client/gui/framework/elements/utils/GuiContext;)V", false),
+					InsertPos.AFTER,
 					new VarInsnNode(Opcodes.ALOAD, 0),
-					new VarInsnNode(Opcodes.ALOAD, 1)
+					new VarInsnNode(Opcodes.ALOAD, 1),
+					new MethodInsnNode(Opcodes.INVOKESTATIC, OnionSkinManager, "afterRenderModel", "(Lmchorse/mclib/client/gui/framework/elements/GuiModelRenderer;Lmchorse/mclib/client/gui/framework/elements/utils/GuiContext;)V", false)
 			);
 		}
 		

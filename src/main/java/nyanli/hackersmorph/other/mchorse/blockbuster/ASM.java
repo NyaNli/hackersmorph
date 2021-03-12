@@ -8,6 +8,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -392,17 +393,6 @@ public class ASM extends ClassTransformer {
 						new VarInsnNode(Opcodes.ALOAD, 1),
 						new VarInsnNode(Opcodes.FLOAD, 9),
 						new MethodInsnNode(Opcodes.INVOKESTATIC, StructureMorphExtraManager, "beforeRender", "(Lmchorse/blockbuster_pack/morphs/StructureMorph;Lnet/minecraft/entity/EntityLivingBase;F)V", false)
-				);
-			} else {
-				String name = isDeobfEnv ? "disableFog" : "func_179106_n";
-				insertNode(method,
-						queryContinue(
-								node -> node.getOpcode() == Opcodes.INVOKEVIRTUAL,
-								node -> "renderTEs".equals(((MethodInsnNode) node).name),
-								node -> StructureRenderer.equals(((MethodInsnNode) node).owner)
-						),
-						InsertPos.AFTER,
-						new MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/client/renderer/GlStateManager", name, "()V", false)
 				);
 			}
 		}
@@ -1077,6 +1067,97 @@ public class ASM extends ClassTransformer {
 					InsertPos.AFTER,
 					label,
 					new FrameNode(Opcodes.F_SAME1, 0, null, 1, new Object[] { Record })
+			);
+		}
+		
+	}
+	
+	@Patcher("mchorse.blockbuster.client.particles.components.BedrockComponentBase")
+	public static class BedrockComponentBasePatcher {
+		
+		@Patcher.Method("canBeEmpty()Z")
+		public static void canBeEmpty(MethodNode method) {
+			insertNode(method,
+					queryNode(method, node -> node.getOpcode() == Opcodes.ICONST_0),
+					InsertPos.REPLACE,
+					new InsnNode(Opcodes.ICONST_1)
+			);
+		}
+		
+	}
+	
+	@Patcher("mchorse.blockbuster.client.particles.components.expiration.BedrockComponentExpireBlocks")
+	public static class BedrockComponentExpireBlocksPatcher {
+		
+		@Patcher.Class
+		public static void addMethod(ClassNode clazz) {
+			MethodVisitor mv = clazz.visitMethod(Opcodes.ACC_PUBLIC, "canBeEmpty", "()Z", null, null);
+			mv.visitCode();
+			Label l0 = new Label();
+			mv.visitLabel(l0);
+			mv.visitLineNumber(22, l0);
+			mv.visitInsn(Opcodes.ICONST_0);
+			mv.visitInsn(Opcodes.IRETURN);
+			Label l1 = new Label();
+			mv.visitLabel(l1);
+			mv.visitLocalVariable("this", "Lmchorse/blockbuster/client/particles/components/expiration/BedrockComponentExpireBlocks;", null, l0, l1, 0);
+			mv.visitMaxs(1, 1);
+			mv.visitEnd();
+		}
+		
+	}
+	
+	@Patcher("mchorse.blockbuster.api.loaders.lazy.ModelLazyLoaderOBJ")
+	public static class ModelLazyLoaderOBJPatcher {
+		
+		private static boolean haveSharp = false;
+		
+		@Patcher.Class
+		public static void check(ClassNode clazz) {
+			for (FieldNode f : clazz.fields) {
+				if ("shapes".equals(f.name)) {
+					haveSharp = true;
+					return;
+				}
+			}
+		}
+		
+		@Patcher.Method("getOBJParser(Ljava/lang/String;Lmchorse/blockbuster/api/Model;)Lmchorse/blockbuster/api/formats/obj/OBJParser;")
+		@Patcher.Method("getMeshes(Ljava/lang/String;Lmchorse/blockbuster/api/Model;)Ljava/util/Map;")
+		public static void objParser(MethodNode method) {
+			if ("getMeshes".equals(method.name) && !haveSharp)
+				return;
+			insertNode(method,
+					queryNode(method,
+							node -> node.getOpcode() == Opcodes.NEW,
+							node -> "mchorse/blockbuster/api/formats/obj/OBJParser".equals(((TypeInsnNode) node).desc)
+					),
+					InsertPos.REPLACE,
+					new TypeInsnNode(Opcodes.NEW, "nyanli/hackersmorph/other/mchorse/blockbuster/client/format/OBJParserFix")
+			);
+			insertNode(method,
+					queryContinue(
+							node -> node.getOpcode() == Opcodes.INVOKESPECIAL,
+							node -> "mchorse/blockbuster/api/formats/obj/OBJParser".equals(((MethodInsnNode) node).owner),
+							node -> "<init>".equals(((MethodInsnNode) node).name)
+					),
+					InsertPos.REPLACE,
+					new MethodInsnNode(Opcodes.INVOKESPECIAL, "nyanli/hackersmorph/other/mchorse/blockbuster/client/format/OBJParserFix", "<init>", "(Ljava/io/InputStream;Ljava/io/InputStream;)V", false)
+			);
+		}
+		
+	}
+	
+	@Patcher("mchorse.blockbuster.network.client.ClientHandlerStructureList")
+	public static class ClientHandlerStructureListPatcher {
+		
+		@Patcher.Method("run(Lnet/minecraft/client/entity/EntityPlayerSP;Lmchorse/blockbuster/network/common/structure/PacketStructureList;)V")
+		public static void run(MethodNode method) {
+			insertNode(method,
+					method.instructions.getFirst(),
+					InsertPos.AFTER,
+					new VarInsnNode(Opcodes.ALOAD, 2),
+					new MethodInsnNode(Opcodes.INVOKESTATIC, StructureMorphExtraManager, "recvStructureList", "(Lmchorse/blockbuster/network/common/structure/PacketStructureList;)V", false)
 			);
 		}
 		

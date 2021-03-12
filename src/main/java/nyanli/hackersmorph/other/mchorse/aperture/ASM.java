@@ -18,7 +18,7 @@ import nyanli.hackersmorph.asm.Patcher;
 public class ASM extends ClassTransformer {
 	
 	private static final String GuiCurves = "mchorse/aperture/client/gui/GuiCurves";
-//	private static final String AbstractFixture = "mchorse/aperture/camera/fixtures/AbstractFixture";
+	private static final String AbstractFixture = "mchorse/aperture/camera/fixtures/AbstractFixture";
 	private static final String CameraProfile = "mchorse/aperture/camera/CameraProfile";
 	private static final String GuiCameraEditor = "mchorse/aperture/client/gui/GuiCameraEditor";
 	
@@ -129,6 +129,35 @@ public class ASM extends ClassTransformer {
 					new VarInsnNode(Opcodes.ALOAD, 1),
 					new MethodInsnNode(Opcodes.INVOKEVIRTUAL, CameraProfile, "getCurves", "()Ljava/util/Map;", false),
 					new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "putAll", "(Ljava/util/Map;)V", true)
+			);
+		}
+		
+		@Patcher.Method("applyProfile(JFFLmchorse/aperture/camera/data/Position;Z)V")
+		public static void applyProfile(MethodNode method) {
+			LabelNode label = new LabelNode();
+			insertNode(method,
+					queryNode(method, node -> node.getOpcode() == Opcodes.RETURN),
+					InsertPos.REPLACE,
+					new VarInsnNode(Opcodes.ALOAD, 0),
+					new FieldInsnNode(Opcodes.GETFIELD, "mchorse/aperture/camera/CameraProfile", "fixtures", "Ljava/util/List;"),
+					new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/List", "size", "()I", true),
+					new JumpInsnNode(Opcodes.IFNE, label),
+					new InsnNode(Opcodes.RETURN),
+					label,
+					new FrameNode(Opcodes.F_SAME, 0, null, 0, null),
+					new VarInsnNode(Opcodes.ALOAD, 0),
+					new FieldInsnNode(Opcodes.GETFIELD, "mchorse/aperture/camera/CameraProfile", "fixtures", "Ljava/util/List;"),
+					new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/List", "size", "()I", true),
+					new InsnNode(Opcodes.ICONST_1),
+					new InsnNode(Opcodes.ISUB),
+					new VarInsnNode(Opcodes.ISTORE, 7),
+					new VarInsnNode(Opcodes.ALOAD, 0),
+					new FieldInsnNode(Opcodes.GETFIELD, "mchorse/aperture/camera/CameraProfile", "fixtures", "Ljava/util/List;"),
+					new VarInsnNode(Opcodes.ILOAD, 7),
+					new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true),
+					new TypeInsnNode(Opcodes.CHECKCAST, "mchorse/aperture/camera/fixtures/AbstractFixture"),
+					new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "mchorse/aperture/camera/fixtures/AbstractFixture", "getDuration", "()J", false),
+					new VarInsnNode(Opcodes.LSTORE, 1)
 			);
 		}
 		

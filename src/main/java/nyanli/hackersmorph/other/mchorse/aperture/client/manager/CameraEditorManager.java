@@ -11,6 +11,7 @@ import mchorse.blockbuster.aperture.CameraHandler;
 import mchorse.blockbuster.network.Dispatcher;
 import mchorse.blockbuster.network.common.scene.sync.PacketScenePlay;
 import mchorse.mclib.utils.keyframes.KeyframeChannel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import nyanli.hackersmorph.other.mchorse.aperture.client.curve.ICurve;
 import nyanli.hackersmorph.other.mchorse.aperture.client.curve.VanillaOptionCurve;
@@ -42,6 +43,9 @@ public class CameraEditorManager {
 		editor.profiles.curves.update();
 		DamageControlChecker.setEnable(false);
 		CameraMorph.setEnabledDraw(false);
+		Minecraft mc = Minecraft.getMinecraft();
+		mc.setRenderViewEntity(mc.player);
+		mc.gameSettings.thirdPersonView = 0;
 	}
 
 	public static void onGuiClose() {

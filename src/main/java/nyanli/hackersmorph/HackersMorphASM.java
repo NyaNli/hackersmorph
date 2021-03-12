@@ -25,6 +25,8 @@ public class HackersMorphASM implements IFMLLoadingPlugin {
 				"nyanli.hackersmorph.other.mchorse.aperture.ASM",
 				"nyanli.hackersmorph.other.mchorse.blockbuster.ASM",
 				"nyanli.hackersmorph.other.mchorse.metamorph.ASM",
+				"nyanli.hackersmorph.other.mchorse.chameleon.ASM",
+				"nyanli.hackersmorph.other.mchorse.emoticons.ASM",
 				"nyanli.hackersmorph.other.optifine.ASM",
 			};
 	}

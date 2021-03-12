@@ -27,13 +27,16 @@ hackersmorph.command.record.blank=\n非BlockBuster原版命令\n/record blank <�
 hackersmorph.command.record.blank.success=已创建文件名为 %s 长度 %s 的空录像文件
 hackersmorph.gui.caption.scene_playing=正在播放场景 %s
 hackersmorph.gui.sequencer.onionskin=洋葱皮
-hackersmorph.gui.sequencer.onionskin.past=先前伪装数量（红色）
-hackersmorph.gui.sequencer.onionskin.later=后续伪装数量（绿色）
+hackersmorph.gui.sequencer.onionskin.past=先前伪装数量
+hackersmorph.gui.sequencer.onionskin.later=后续伪装数量
+hackersmorph.gui.sequencer.onionskin.past.color=先前伪装颜色
+hackersmorph.gui.sequencer.onionskin.later.color=后续伪装颜色
 hackersmorph.gui.sequencer.repeatoffset=模型循环位移
 hackersmorph.gui.sequencer.repeatoffset.times=循环次数（设为0关闭位移，只会改变模型渲染位置，实体位置不会改变）
 hackersmorph.gui.sequencer.repeatoffset.x=模型坐标偏移X
 hackersmorph.gui.sequencer.repeatoffset.y=模型坐标偏移Y
 hackersmorph.gui.sequencer.repeatoffset.z=模型坐标偏移Z
+hackersmorph.gui.sequencer.repeatoffset.color=洋葱皮颜色
 hackersmorph.gui.snowstorm.save=保存为预设
 hackersmorph.gui.snowstorm.save.tip=请输入要保存的预设名：
 hackersmorph.gui.snowstorm.save.error=存在相同名称的系统预设，此名称不可用。
@@ -56,8 +59,15 @@ hackersmorph.gui.structure.custom.block=方块光源
 hackersmorph.gui.structure.custom.reset=重置曲线
 hackersmorph.gui.action.morph.showscene=预览场景
 hackersmorph.gui.action.morph.showonionskin=洋葱皮
+hackersmorph.gui.action.morph.showscene.color=预览场景颜色
+hackersmorph.gui.action.morph.showonionskin.color=洋葱皮颜色
 hackersmorph.msg.actionbar.damagecontrol.scene=此方块由场景 %s 的破坏控制功能管理
 hackersmorph.msg.actionbar.damagecontrol.recorder=此方块由录制者 %s 的破坏控制功能管理
+hackersmorph.gui.dashboard.midkeyframegenerator=补间关键帧生成器
+hackersmorph.gui.dashboard.midkeyframegenerator.btn.begin=起始伪装
+hackersmorph.gui.dashboard.midkeyframegenerator.btn.end=结束伪装
+hackersmorph.gui.dashboard.midkeyframegenerator.btn.generate=生成关键帧
+hackersmorph.gui.dashboard.midkeyframegenerator.msg=请选择具有动画功能的伪装
 
 # Translate results reference from Minecraft 1.13 zh_cn.json
 # Biome id map reference from Minecraft 1.13-pre5 update log

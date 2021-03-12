@@ -30,8 +30,11 @@ import mchorse.blockbuster_pack.morphs.SequencerMorph;
 import mchorse.blockbuster_pack.morphs.SequencerMorph.SequenceEntry;
 import mchorse.mclib.client.gui.framework.elements.GuiElement;
 import mchorse.mclib.client.gui.framework.elements.buttons.GuiToggleElement;
+import mchorse.mclib.client.gui.framework.elements.input.GuiColorElement;
+import mchorse.mclib.client.gui.framework.elements.input.color.GuiColorPicker;
 import mchorse.mclib.client.gui.framework.elements.utils.GuiContext;
 import mchorse.mclib.client.gui.utils.keys.IKey;
+import mchorse.mclib.utils.Color;
 import mchorse.metamorph.api.Morph;
 import mchorse.metamorph.api.MorphUtils;
 import mchorse.metamorph.api.morphs.AbstractMorph;
@@ -42,11 +45,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraftforge.common.config.Property;
+import nyanli.hackersmorph.HackersMorph;
+import nyanli.hackersmorph.config.Config;
 import nyanli.hackersmorph.other.mchorse.blockbuster.common.manager.SequencerMorphManager;
 import nyanli.hackersmorph.other.mchorse.metamorph.client.manager.OnionSkinManager;
 import nyanli.hackersmorph.other.mchorse.metamorph.client.manager.OnionSkinManager.OnionSkin;
 
 public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
+	
+	public static final String CATEGORY = "MorphAction";
 
 	private static final FoundAction ACTION = new FoundAction();
 	private static EntityActor actor;
@@ -136,8 +144,15 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 		return true;
 	}
 	
+	private Property cfgShowScene;
+	private Property cfgOtherColor;
+	private Property cfgShowOnionSkin;
+	private Property cfgSkinColor;
+	
 	private GuiToggleElement showScene;
+	private GuiColorElement otherColor;
 	private GuiToggleElement showOnionSkin;
+	private GuiColorElement skinColor;
 	
 	private boolean enableOnionSkin;
 	private HashMap<Replay, OnionSkin> onionSkinMap = new HashMap<>();
@@ -152,15 +167,30 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 		this.pickMorph.pick.callback = this.mergeCallback(this.pickMorph.pick.callback, this::beginOnionSkin);
 		this.pickMorph.edit.callback = this.mergeCallback(this.pickMorph.edit.callback, this::beginOnionSkin);
 		
-		this.showScene = new GuiToggleElement(mc, IKey.lang("hackersmorph.gui.action.morph.showscene"), null);
-		this.showScene.toggled(true);
-		this.showOnionSkin = new GuiToggleElement(mc, IKey.lang("hackersmorph.gui.action.morph.showonionskin"), null);
-		this.showOnionSkin.toggled(true);
+		Config cfg = HackersMorph.getConfig();
 		
-		this.showOnionSkin.flex().relative(this).x(0.0f, 10).w(100).y(1.0f, -30).anchorY(0);
-		this.showScene.flex().relative(this.showOnionSkin).w(100).y(-25).anchorY(0);
+		this.cfgShowScene = cfg.getConfig(CATEGORY, "showscene", true);
+		this.cfgOtherColor = cfg.getConfig(CATEGORY, "scenecolor", "#FF7F7F7F");
+		this.cfgShowOnionSkin = cfg.getConfig(CATEGORY, "showonionskin", true);
+		this.cfgSkinColor = cfg.getConfig(CATEGORY, "onionskincolor", "#7FFFFF00");
 		
-		this.add(this.showOnionSkin, this.showScene);
+		this.showScene = new GuiToggleElement(mc, IKey.lang("hackersmorph.gui.action.morph.showscene"), b -> this.cfgShowScene.set(b.isToggled()));
+		this.showScene.toggled(this.cfgShowScene.getBoolean());
+		this.otherColor = new GuiColorElement(mc, c -> this.cfgOtherColor.set(String.format("#%08X", c))).onTop();
+		this.otherColor.picker.editAlpha().setColor(Long.decode(cfgOtherColor.getString()).intValue());
+		this.otherColor.tooltip(IKey.lang("hackersmorph.gui.action.morph.showscene.color"));
+		this.showOnionSkin = new GuiToggleElement(mc, IKey.lang("hackersmorph.gui.action.morph.showonionskin"), b -> this.cfgShowOnionSkin.set(b.isToggled()));
+		this.showOnionSkin.toggled(this.cfgShowOnionSkin.getBoolean());
+		this.skinColor = new GuiColorElement(mc, c -> this.cfgSkinColor.set(String.format("#%08X", c))).onTop();
+		this.skinColor.picker.editAlpha().setColor(Long.decode(cfgSkinColor.getString()).intValue());
+		this.skinColor.tooltip(IKey.lang("hackersmorph.gui.action.morph.showonionskin.color"));
+		
+		this.skinColor.flex().relative(this).x(0.0f, 10).w(100).y(1.0f, -30).anchorY(0);
+		this.showOnionSkin.flex().relative(this.skinColor).w(100).y(-20).anchorY(0);
+		this.otherColor.flex().relative(this.showOnionSkin).w(100).y(-25).anchorY(0);
+		this.showScene.flex().relative(this.otherColor).w(100).y(-20).anchorY(0);
+		
+		this.add(this.skinColor, this.showOnionSkin, this.otherColor, this.showScene);
 	}
 
 	@Override
@@ -177,14 +207,18 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 
 	@Override
 	public void disappear() {
+		HackersMorph.getConfig().save();
 		endOnionSkin();
 		super.disappear();
 	}
 	
 	@Override
 	public void draw(GuiContext context) {
-		this.showScene.setVisible(ClientProxy.panels.directorPanel.getReplays() != null && CameraHandler.canSync() && CameraHandler.isCameraEditorOpen());
-		this.showOnionSkin.setVisible(ClientProxy.panels.directorPanel.getReplays() != null && CameraHandler.canSync() && CameraHandler.isCameraEditorOpen());
+		boolean v = ClientProxy.panels.directorPanel.getReplays() != null && CameraHandler.canSync() && CameraHandler.isCameraEditorOpen();
+		this.showScene.setVisible(v);
+		this.otherColor.setVisible(v);
+		this.showOnionSkin.setVisible(v);
+		this.skinColor.setVisible(v);
 		
 		super.draw(context);
 		
@@ -261,13 +295,13 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 			Vec3d base = actor.getPositionVector();
 			float yaw = actor.rotationYaw;
 			
-			Color4f color = new Color4f();
+			Color color = null;
 			boolean lighting = false;
 			for (Replay replay : this.onionSkinMap.keySet()) {
 				if (replay.id.equals(this.currentRecord.filename)) {
 					// Onion Skin
 					lighting = false;
-					color.set(1f, 1f, 0f, 0.5f);
+					color = this.skinColor.picker.color;
 					if (!this.showOnionSkin.isToggled() || !this.showOnionSkin.isVisible())
 						actor.morph.setDirect(null);
 					else if (this.offset == 0)
@@ -279,7 +313,7 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 				} else {
 					// Scene
 					lighting = true;
-					color.set(0.5f, 0.5f, 0.5f, 1f);
+					color = this.otherColor.picker.color;
 					if (!this.showScene.isToggled() || !this.showScene.isVisible())
 						actor.morph.setDirect(null);
 					else
@@ -288,7 +322,7 @@ public class GuiMorphActionExtraPanel extends GuiMorphActionPanel {
 				Vec3d pos = actor.getPositionVector().subtract(base);
 				pos = pos.rotateYaw((float) Math.toRadians(yaw));
 				this.onionSkinMap.get(replay)
-					.color(color.x, color.y, color.z, color.w)
+					.color(color.r, color.g, color.b, color.a)
 					.morph(actor.morph.get())
 					.offset(pos.x, pos.y, pos.z, actor.rotationPitch, actor.rotationYaw - yaw, actor.renderYawOffset - yaw)
 					.light(lighting);

@@ -25,6 +25,7 @@ import com.google.gson.GsonBuilder;
 
 import mchorse.blockbuster.network.Dispatcher;
 import mchorse.blockbuster.network.client.ClientHandlerStructure.FakeWorld;
+import mchorse.blockbuster.network.common.structure.PacketStructureList;
 import mchorse.blockbuster.network.common.structure.PacketStructureRequest;
 import mchorse.blockbuster_pack.morphs.StructureMorph;
 import mchorse.blockbuster_pack.morphs.StructureMorph.StructureRenderer;
@@ -117,6 +118,18 @@ public class StructureMorphExtraManager {
 	
 	public static boolean equalsObj(boolean last, StructureMorph a, Object b) {
 		return last && b instanceof StructureMorph && getExProps(a).equals(getExProps((StructureMorph) b));
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public static void recvStructureList(PacketStructureList packet) {
+		for (String structure : packet.structures) {
+			if (structures.get(structure) == null) {
+				if (!waiting.contains(structure)) {
+					Dispatcher.sendToServer(new PacketStructureRequest(structure));
+					waiting.add(structure);
+				}
+			}
+		}
 	}
 	
 	@SideOnly(Side.CLIENT)
@@ -1059,9 +1072,8 @@ public class StructureMorphExtraManager {
 					TileEntityRendererDispatcher.instance.render(te, pos.getX() - this.size.getX() / 2.0,
 							(double) pos.getY() - 64.0, pos.getZ() - this.size.getZ() / 2.0, 0.0f);
 				});
-				if (GuiModelRenderer.isRendering())
-					GlStateManager.disableFog(); // Beacon
 			}
+			GlStateManager.disableFog(); // I hate Beacon and End Gateway.
 			if (this.es != null) {
 				this.es.forEach((e, light) -> {
 					if (!this.prop.acceptLighting) {

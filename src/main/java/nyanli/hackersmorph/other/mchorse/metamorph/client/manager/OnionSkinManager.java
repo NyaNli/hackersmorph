@@ -5,32 +5,63 @@ import java.util.Stack;
 
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector3d;
+
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
+
 import mchorse.mclib.client.gui.framework.elements.GuiModelRenderer;
 import mchorse.mclib.client.gui.framework.elements.utils.GuiContext;
+import mchorse.mclib.utils.shaders.Shader;
 import mchorse.metamorph.api.MorphUtils;
 import mchorse.metamorph.api.morphs.AbstractMorph;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.EntityLivingBase;
 import nyanli.hackersmorph.other.minecraft.common.manager.RenderManager;
 
 public class OnionSkinManager {
+	
+	private static final String VERT = "#version 120\nuniform vec4 onionskin;\nvarying vec4 color;\nvarying vec4 texcoord;\nvarying vec4 lmcoord;\nvoid main()\n{\ngl_Position=ftransform();\ncolor=gl_Color*onionskin;\ntexcoord=gl_TextureMatrix[0]*gl_MultiTexCoord0;\nlmcoord=gl_TextureMatrix[1]*gl_MultiTexCoord1;\n}";
+	private static final String FRAG = "#version 120\nuniform sampler2D texture;\nuniform sampler2D lightmap;\nvarying vec4 color;\nvarying vec4 texcoord;\nvarying vec4 lmcoord;\nvoid main()\n{\nvec4 lm=texture2D(lightmap,lmcoord.st);\ngl_FragColor=mix(vec4(1),lm,lm.a)*texture2D(texture,texcoord.st)*color;\n}";
 	
 	private static ArrayList<OnionSkin> current = new ArrayList<>();
 	private static ArrayList<OnionSkin> last = null;
 	
 	private static Stack<ArrayList<OnionSkin>> stack = new Stack<>();
 	
-	public static void beforeRenderModel(GuiModelRenderer renderer, GuiContext context) {
+	private static Shader shader;
+	private static int uniform = -1;
+	
+	static {
+		try {
+			shader = new Shader();
+			shader.compile(VERT, FRAG, true);
+			uniform = GL20.glGetUniformLocation(shader.programId, "onionskin");
+			GL20.glUniform1i(GL20.glGetUniformLocation(shader.programId, "texture"), 0);
+			GL20.glUniform1i(GL20.glGetUniformLocation(shader.programId, "lightmap"), 1);
+		} catch (Exception e) {
+			shader = null;
+		}
+	}
+	
+	public static void afterRenderModel(GuiModelRenderer renderer, GuiContext context) {
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.enablePolygonOffset();
 		GlStateManager.doPolygonOffset(1f, 1f);
+		int program = -1;
+		if (shader != null) {
+			program = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+			GL20.glUseProgram(shader.programId);
+		}
 		if (last != null)
 			for (OnionSkin skin : last)
 				renderOnionSkin(renderer, skin);
 		if (current != null)
 			for (OnionSkin skin : current)
 				renderOnionSkin(renderer, skin);
+		if (program >= 0)
+			GL20.glUseProgram(program);
 		GlStateManager.disablePolygonOffset();
 		GlStateManager.disableBlend();
 	}
@@ -57,9 +88,12 @@ public class OnionSkinManager {
 		if (!skin.light)
 			GlStateManager.disableLighting();
 		if (skin.color != null) {
-			// Use shader will be better
-			GlStateManager.color(skin.color.getX(), skin.color.getY(), skin.color.getZ(), skin.color.getW());
-			RenderManager.lockColor();
+			if (shader != null)
+				GL20.glUniform4f(uniform, skin.color.getX(), skin.color.getY(), skin.color.getZ(), skin.color.getW());
+			else {
+				GlStateManager.color(skin.color.getX(), skin.color.getY(), skin.color.getZ(), skin.color.getW());
+				RenderManager.lockColor();
+			}
 		}
 		EntityLivingBase entity = renderer.getEntity();
 		float prevPitch = entity.prevRotationPitch;
@@ -84,7 +118,7 @@ public class OnionSkinManager {
 		entity.renderYawOffset = yawOffset;
 		entity.rotationYaw = yaw;
 		entity.rotationYawHead = yawHead;
-		if (skin.color != null)
+		if (skin.color != null && shader == null)
 			RenderManager.unlockColor();
 		if (!skin.light)
 			GlStateManager.enableLighting();
