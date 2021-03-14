@@ -430,14 +430,24 @@ public class ASM extends ClassTransformer {
 	@Patcher("mchorse.blockbuster_pack.morphs.SnowstormMorph")
 	public static class SnowstormMorphPatcher {
 		
+		@Patcher.Class
+		public static void addField(ClassNode clazz) {
+			clazz.visitField(Opcodes.ACC_PUBLIC, "asmStandalone", "Z", null, false).visitEnd();
+		}
+		
 		@Patcher.Method("render(Lnet/minecraft/entity/EntityLivingBase;DDDFF)V")
 		public static void render(MethodNode method) {
 			// this.lastUpdate = BedrockLibrary.lastUpdate; 禁用Scheme更新
 			insertNode(method,
 					queryNode(method, node -> node.getOpcode() == Opcodes.GETFIELD),
 					InsertPos.BEFORE,
+//					new InsnNode(Opcodes.DUP),
+//					new FieldInsnNode(Opcodes.GETSTATIC, BedrockLibrary, "lastUpdate", "J"),
 					new InsnNode(Opcodes.DUP),
-					new FieldInsnNode(Opcodes.GETSTATIC, BedrockLibrary, "lastUpdate", "J"),
+					new InsnNode(Opcodes.DUP),
+					new InsnNode(Opcodes.DUP),
+					new FieldInsnNode(Opcodes.GETFIELD, SnowstormMorph, "lastUpdate", "J"),
+					new MethodInsnNode(Opcodes.INVOKESTATIC, SnowstormMorphExtraManager, "getLastUpdate", "(Lmchorse/blockbuster_pack/morphs/SnowstormMorph;J)J", false),
 					new FieldInsnNode(Opcodes.PUTFIELD, SnowstormMorph, "lastUpdate", "J")
 			);
 		}
@@ -505,16 +515,16 @@ public class ASM extends ClassTransformer {
 			);
 		}
 		
-		@Patcher.Method("getScheme(Ljava/lang/String;)Lmchorse/blockbuster/client/particles/BedrockScheme;")
-		public static void getScheme(MethodNode method) {
-			insertNode(method,
-					queryNode(method,
-							node -> node.getOpcode() == Opcodes.INVOKEINTERFACE
-					),
-					InsertPos.REPLACE,
-					new MethodInsnNode(Opcodes.INVOKESTATIC, SnowstormMorphExtraManager, "getScheme", "(Ljava/util/Map;Ljava/lang/String;)Lmchorse/blockbuster/client/particles/BedrockScheme;", false)
-			);
-		}
+//		@Patcher.Method("getScheme(Ljava/lang/String;)Lmchorse/blockbuster/client/particles/BedrockScheme;")
+//		public static void getScheme(MethodNode method) {
+//			insertNode(method,
+//					queryNode(method,
+//							node -> node.getOpcode() == Opcodes.INVOKEINTERFACE
+//					),
+//					InsertPos.REPLACE,
+//					new MethodInsnNode(Opcodes.INVOKESTATIC, SnowstormMorphExtraManager, "getScheme", "(Ljava/util/Map;Ljava/lang/String;)Lmchorse/blockbuster/client/particles/BedrockScheme;", false)
+//			);
+//		}
 		
 	}
 	

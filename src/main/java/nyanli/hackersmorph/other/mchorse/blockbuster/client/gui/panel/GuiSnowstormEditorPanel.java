@@ -1,5 +1,9 @@
 package nyanli.hackersmorph.other.mchorse.blockbuster.client.gui.panel;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+
 import mchorse.blockbuster.Blockbuster;
 import mchorse.blockbuster.client.gui.dashboard.panels.snowstorm.sections.GuiSnowstormGeneralSection;
 import mchorse.blockbuster.client.gui.dashboard.panels.snowstorm.sections.GuiSnowstormSection;
@@ -9,6 +13,9 @@ import mchorse.blockbuster.client.particles.emitter.BedrockEmitter;
 import mchorse.blockbuster_pack.morphs.SnowstormMorph;
 import mchorse.mclib.client.gui.framework.elements.GuiElement;
 import mchorse.mclib.client.gui.framework.elements.buttons.GuiIconElement;
+import mchorse.mclib.client.gui.framework.elements.buttons.GuiToggleElement;
+import mchorse.mclib.client.gui.framework.elements.list.GuiListElement;
+import mchorse.mclib.client.gui.framework.elements.list.GuiSearchListElement;
 import mchorse.mclib.client.gui.framework.elements.modals.GuiConfirmModal;
 import mchorse.mclib.client.gui.framework.elements.modals.GuiMessageModal;
 import mchorse.mclib.client.gui.framework.elements.modals.GuiModal;
@@ -19,13 +26,19 @@ import mchorse.mclib.client.gui.utils.Icons;
 import mchorse.mclib.client.gui.utils.keys.IKey;
 import mchorse.metamorph.client.gui.editor.GuiMorphPanel;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.biome.Biome;
 import nyanli.hackersmorph.other.mchorse.blockbuster.client.gui.GuiSnowstormMorphExtra;
+import nyanli.hackersmorph.other.mchorse.blockbuster.common.manager.SnowstormMorphExtraManager;
 
 // 暴雪粒子伪装编辑器
 public class GuiSnowstormEditorPanel extends GuiMorphPanel<SnowstormMorph, GuiSnowstormMorphExtra> {
 	
+	private GuiToggleElement standalone;
 	private GuiIconElement save;
 	private GuiElement save_panel;
+	private GuiSearchListElement<String> presets;
 
 	public GuiSnowstormEditorPanel(Minecraft mc, GuiSnowstormMorphExtra editor) {
 		super(mc, editor);
@@ -40,6 +53,9 @@ public class GuiSnowstormEditorPanel extends GuiMorphPanel<SnowstormMorph, GuiSn
 			}
 		}
 		
+		standalone = new GuiToggleElement(mc, IKey.lang("hackersmorph.gui.snowstorm.standalone"), e -> this.switchMode(e.isToggled()));
+		standalone.flex().relative(this).x(20).y(30).w(100);
+		
 		save = new GuiIconElement(mc, Icons.SAVED, e -> this.saveAs());
 		save.tooltip(IKey.lang("hackersmorph.gui.snowstorm.save"));
 		save.flex().relative(this);
@@ -47,9 +63,31 @@ public class GuiSnowstormEditorPanel extends GuiMorphPanel<SnowstormMorph, GuiSn
 		save_panel = new GuiElement(mc);
 		save_panel.flex().relative(this).y(20).w(160).hTo(this.area, 1.0f, -16);
 		
-		this.add(new GuiDrawable(this::drawOverlay), editor.getProxy().editor, save, save_panel);
+		presets = new GuiSearchListElement<String>(mc, s -> this.setPreset(s.get(0))) {
+
+			@Override
+			protected GuiListElement<String> createList(Minecraft mc, Consumer<List<String>> callback) {
+				return new GuiListElement<String>(mc, callback) {
+					
+					@Override
+					protected boolean sortElements() {
+						Collections.<String>sort(this.list, (a, b) -> a.compareTo(b));
+						return true;
+					}
+					
+				};
+			}
+			
+		};
+		presets.list.sort();
+		presets.flex().relative(this).x(1.0f).w(180).h(1.0f).anchorX(1.0f);
+		presets.list.background(0x80000000);
+		presets.resize();
+		presets.list.scroll.scrollSpeed = 15;
+		
+		this.add(new GuiDrawable(this::drawOverlay), editor.getProxy().editor, standalone, save, save_panel, presets);
 	}
-	
+
 	/**
      * Reference from Blockbuster Mod
 	 * Url: https://github.com/mchorse/blockbuster
@@ -61,11 +99,9 @@ public class GuiSnowstormEditorPanel extends GuiMorphPanel<SnowstormMorph, GuiSn
     @Override
     public void fillData(SnowstormMorph morph) {
         super.fillData(morph);
-        BedrockScheme scheme = morph.getEmitter().scheme;
-        editor.getProxy().renderer.setScheme(scheme);
-        for (GuiSnowstormSection section : editor.getProxy().sections)
-        	section.setScheme(scheme);
-        editor.getProxy().editor.resize();
+        
+        standalone.toggled(SnowstormMorphExtraManager.getStandalone(morph));
+        this.switchMode(SnowstormMorphExtraManager.getStandalone(morph));
     }
 	
     @Override
@@ -133,6 +169,35 @@ public class GuiSnowstormEditorPanel extends GuiMorphPanel<SnowstormMorph, GuiSn
 					() -> new GuiPromptModal(mc,
 							IKey.lang("blockbuster.gui.snowstorm.add_modal"), 
 							n -> this.saveAs(n)).setValue(name).filename());
+	}
+	
+	private void setPreset(String preset) {
+		if (!SnowstormMorphExtraManager.getStandalone(morph)) {
+			morph.scheme = preset;
+    		SnowstormMorphExtraManager.updateScheme(morph, Blockbuster.proxy.particles.load(preset));
+		}
+        for (GuiSnowstormSection section : editor.getProxy().sections)
+        	section.setScheme(this.morph.getEmitter().scheme);
+        editor.getProxy().editor.resize();
+		editor.getProxy().renderer.setScheme(morph.getEmitter().scheme);
+	}
+	
+	private void switchMode(boolean toggled) {
+		SnowstormMorphExtraManager.setStandalone(this.morph, toggled);
+		save.setVisible(toggled);
+		save_panel.setVisible(toggled);
+		editor.getProxy().editor.setVisible(toggled);
+		presets.setVisible(!toggled);
+		if (!toggled && !Blockbuster.proxy.particles.presets.containsKey(this.morph.scheme))
+        		this.morph.scheme = "default_rain";
+        setPreset(this.morph.scheme);
+    	if (!toggled) {
+        	presets.list.clear();
+        	for (String preset : Blockbuster.proxy.particles.presets.keySet())
+        		presets.list.add(preset);
+        	presets.list.setCurrent(this.morph.scheme);
+        	presets.list.update();
+        }
 	}
 
 }

@@ -41,6 +41,7 @@ hackersmorph.gui.snowstorm.save=Save as preset
 hackersmorph.gui.snowstorm.save.tip=Please input a name for this preset:
 hackersmorph.gui.snowstorm.save.error=This name is the same as the system preset name and cannot be used.
 hackersmorph.gui.snowstorm.override.tip=There is a preset with the same name. Do you want to override it?\n(Warning: this operation cannot be undo.)
+hackersmorph.gui.snowstorm.standalone=Storage to NBT
 hackersmorph.gui.structure.title=Structure Morph
 hackersmorph.gui.structure.loading=Loading Structure: %s
 hackersmorph.gui.structure.empty=Empty Structure：%s

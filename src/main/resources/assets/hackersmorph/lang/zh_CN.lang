@@ -41,6 +41,7 @@ hackersmorph.gui.snowstorm.save=保存为预设
 hackersmorph.gui.snowstorm.save.tip=请输入要保存的预设名：
 hackersmorph.gui.snowstorm.save.error=存在相同名称的系统预设，此名称不可用。
 hackersmorph.gui.snowstorm.override.tip=存在相同名称的预设，是否覆盖？\n（警告：此操作不可恢复）
+hackersmorph.gui.snowstorm.standalone=存储至NBT
 hackersmorph.gui.structure.title=结构伪装
 hackersmorph.gui.structure.loading=结构加载中：%s
 hackersmorph.gui.structure.empty=空结构：%s

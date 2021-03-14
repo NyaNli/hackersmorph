@@ -7,6 +7,7 @@ import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -170,30 +171,41 @@ public class ASM extends ClassTransformer {
 		
 	}
 	
-//	@SideOnly(Side.CLIENT)
-//	@Patcher("net/minecraft/client/renderer/BufferBuilder")
-//	public static class BufferBuilderPatch {
-//		
-//		@Patcher.Method("a(ILcea;)V")
-//		@Patcher.Method("begin(ILnet/minecraft/client/renderer/vertex/VertexFormat;)V")
-//		public static void begin(MethodNode method) {
-//			insertNode(method,
-//					method.instructions.getFirst(),
-//					InsertPos.BEFORE,
-//					new MethodInsnNode(Opcodes.INVOKESTATIC, RenderManager, "pushRender", "()V", false)
-//			);
-//		}
-//		
-//		@Patcher.Method("e()V")
-//		@Patcher.Method("finishDrawing()V")
-//		public static void finishDrawing(MethodNode method) {
-//			insertNode(method,
-//					method.instructions.getFirst(),
-//					InsertPos.BEFORE,
-//					new MethodInsnNode(Opcodes.INVOKESTATIC, RenderManager, "popRender", "()V", false)
-//			);
-//		}
-//		
-//	}
+	@Patcher("net.minecraft.network.play.server.SPacketCustomPayload")
+	public static class SPacketCustomPayloadPatcher {
+		
+		@Patcher.Method("<init>(Ljava/lang/String;Lnet/minecraft/network/PacketBuffer;)V")
+		@Patcher.Method("<init>(Ljava/lang/String;Lgy;)V")
+		public static void constructor(MethodNode method) {
+			insertNode(method,
+					queryNode(method,
+							node -> node.getOpcode() == Opcodes.LDC,
+							node -> new Integer(1048576).equals(((LdcInsnNode) node).cst)
+					),
+					InsertPos.REPLACE,
+//					new MethodInsnNode(Opcodes.INVOKESTATIC, "mchorse/mclib/utils/PayloadASM", "getPayloadSize", "()I", false)
+					new LdcInsnNode(Integer.MAX_VALUE)
+			);
+		}
+		
+	}
+	
+	@Patcher("net.minecraft.network.PacketBuffer")
+	public static class PacketBufferPatcher {
+		
+		@Patcher.Method("readCompoundTag()Lnet/minecraft/nbt/NBTTagCompound;")
+		@Patcher.Method("j()Lfy;")
+		public static void constructor(MethodNode method) {
+			insertNode(method,
+					queryNode(method,
+							node -> node.getOpcode() == Opcodes.LDC,
+							node -> new Long(2097152L).equals(((LdcInsnNode) node).cst)
+					),
+					InsertPos.REPLACE,
+					new LdcInsnNode(Long.MAX_VALUE)
+			);
+		}
+		
+	}
 
 }

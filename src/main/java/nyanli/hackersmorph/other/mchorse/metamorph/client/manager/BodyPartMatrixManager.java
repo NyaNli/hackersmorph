@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;
 
 import javax.vecmath.Matrix4f;
+import javax.vecmath.SingularMatrixException;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
@@ -36,40 +37,45 @@ public class BodyPartMatrixManager {
 			Matrix4f current = MatrixUtils.readModelView(new Matrix4f());
 			GL11.glPopMatrix();
 			GL11.glPushMatrix();
-			Matrix4f limb = MatrixUtils.readModelView(new Matrix4f());
-			limb.invert();
-			limb.mul(current);
+			Matrix4f limb = null;
+			try {
+				limb = MatrixUtils.readModelView(new Matrix4f());
+				limb.invert();
+				limb.mul(current);
+			} catch (SingularMatrixException e) {}
 			
 			if (map.containsKey(bodyPart) && Boolean.TRUE.equals(doCalc.get(bodyPart))) {
 				doCalc.put(bodyPart, false);
 				Matrix4f lastLimb = map.get(bodyPart);
 				
-				Matrix4f convertMat = new Matrix4f(limb);
-				convertMat.invert();
-				convertMat.mul(lastLimb);
-				
-				// I hate radians
-				Matrix4f bodyPartTransform = new Matrix4f(
-						1, 0, 0, bodyPart.translate.x,
-						0, 1, 0, bodyPart.translate.y,
-						0, 0, 1, bodyPart.translate.z,
-						0, 0, 0, 1
-						);
-				convertMat.mul(bodyPartTransform);
-				bodyPartTransform.rotZ((float) Math.toRadians(bodyPart.rotate.z));
-				convertMat.mul(bodyPartTransform);
-				bodyPartTransform.rotY((float) Math.toRadians(bodyPart.rotate.y));
-				convertMat.mul(bodyPartTransform);
-				bodyPartTransform.rotX((float) Math.toRadians(bodyPart.rotate.x));
-				convertMat.mul(bodyPartTransform);
-				
-				TransformPack pack = calcTransform(convertMat);
-				if (pack != null) {
-					bodyPart.translate.set(pack.translate);
-					bodyPart.rotate.set(pack.rotate);
-					bodyPart.scale.x *= pack.scale.x;
-					bodyPart.scale.y *= pack.scale.y;
-					bodyPart.scale.z *= pack.scale.z;
+				if (lastLimb != null) {
+					Matrix4f convertMat = new Matrix4f(limb);
+					convertMat.invert();
+					convertMat.mul(lastLimb);
+					
+					// I hate radians
+					Matrix4f bodyPartTransform = new Matrix4f(
+							1, 0, 0, bodyPart.translate.x,
+							0, 1, 0, bodyPart.translate.y,
+							0, 0, 1, bodyPart.translate.z,
+							0, 0, 0, 1
+							);
+					convertMat.mul(bodyPartTransform);
+					bodyPartTransform.rotZ((float) Math.toRadians(bodyPart.rotate.z));
+					convertMat.mul(bodyPartTransform);
+					bodyPartTransform.rotY((float) Math.toRadians(bodyPart.rotate.y));
+					convertMat.mul(bodyPartTransform);
+					bodyPartTransform.rotX((float) Math.toRadians(bodyPart.rotate.x));
+					convertMat.mul(bodyPartTransform);
+					
+					TransformPack pack = calcTransform(convertMat);
+					if (pack != null) {
+						bodyPart.translate.set(pack.translate);
+						bodyPart.rotate.set(pack.rotate);
+						bodyPart.scale.x *= pack.scale.x;
+						bodyPart.scale.y *= pack.scale.y;
+						bodyPart.scale.z *= pack.scale.z;
+					}
 				}
 			}
 			if (!map.containsKey(bodyPart))

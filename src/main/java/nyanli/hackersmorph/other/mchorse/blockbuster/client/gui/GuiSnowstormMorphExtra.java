@@ -28,16 +28,16 @@ public class GuiSnowstormMorphExtra extends GuiSnowstormMorph {
 		this.registerPanel(this.defaultPanel, IKey.lang("blockbuster.gui.snowstorm.title"), BBIcons.EDITOR);
 	}
 
-	@Override
-	public List<Label<NBTTagCompound>> getPresets(SnowstormMorph arg0) {
-		final List<Label<NBTTagCompound>> labels = new ArrayList<Label<NBTTagCompound>>();
-		for (final String preset : Blockbuster.proxy.particles.presets.keySet()) {
-			final NBTTagCompound tag = new NBTTagCompound();
-			tag.setString("Data", BedrockScheme.JSON_PARSER.toJson(Blockbuster.proxy.particles.presets.get(preset)));
-			this.addPreset(morph, labels, preset, tag);
-		}
-		return labels;
-	}
+//	@Override
+//	public List<Label<NBTTagCompound>> getPresets(SnowstormMorph arg0) {
+//		final List<Label<NBTTagCompound>> labels = new ArrayList<Label<NBTTagCompound>>();
+//		for (final String preset : Blockbuster.proxy.particles.presets.keySet()) {
+//			final NBTTagCompound tag = new NBTTagCompound();
+//			tag.setString("Data", BedrockScheme.JSON_PARSER.toJson(Blockbuster.proxy.particles.presets.get(preset)));
+//			this.addPreset(morph, labels, preset, tag);
+//		}
+//		return labels;
+//	}
 	
 	@Override
 	protected GuiModelRenderer createMorphRenderer(Minecraft mc) {
